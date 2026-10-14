@@ -77,6 +77,7 @@ async function getHeadlessBrowser(): Promise<Browser> {
 }
 
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     {
