@@ -108,11 +108,26 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
     []
   );
 
-  // Listen for live DOM pushes from other tabs via /api/push-dom
+  // Listen for live DOM pushes from other tabs via /api/push-dom (localhost dev server only)
   useEffect(() => {
+    const isLocalhost =
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname === '0.0.0.0');
+
+    if (!isLocalhost) return;
+
+    let stopped = false;
     const interval = window.setInterval(async () => {
+      if (stopped) return;
       try {
         const res = await fetch('/api/push-dom');
+        if (res.status === 404) {
+          stopped = true;
+          window.clearInterval(interval);
+          return;
+        }
         if (!res.ok) return;
         const data = await res.json();
         if (data && data.id && data.id > lastPushIdRef.current && data.html) {
@@ -123,7 +138,10 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
         // ignore polling errors
       }
     }, 1500);
-    return () => window.clearInterval(interval);
+    return () => {
+      stopped = true;
+      window.clearInterval(interval);
+    };
   }, [setCustomHtml]);
 
   // Allow pressing Cmd+V anywhere on the Studio page to paste copied <html> from DevTools Elements tab
