@@ -256,51 +256,67 @@ export const useStudioStore = create<StudioState>((set, get) => ({
       targetMode: 'url',
     });
 
-    try {
-      const res = await fetch(`/api/proxy?url=${encodeURIComponent(normalized)}`);
-      if (!res.ok) {
-        let serverErr = `Proxy returned HTTP ${res.status}`;
-        try {
-          const errJson = await res.json();
-          if (errJson && errJson.error) {
-            serverErr = errJson.error;
-          }
-        } catch {
-          // ignore JSON parse error
-        }
+    const isLocalhost =
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname === '0.0.0.0');
 
+    try {
+      let rawHtml: string | null = null;
+
+      if (isLocalhost) {
+        // 1. On localhost: use Vite Puppeteer proxy
+        const res = await fetch(`/api/proxy?url=${encodeURIComponent(normalized)}`);
+        if (res.ok) {
+          rawHtml = await res.text();
+        } else {
+          let serverErr = `Local proxy returned HTTP ${res.status}`;
+          try {
+            const errJson = await res.json();
+            if (errJson && errJson.error) {
+              serverErr = errJson.error;
+            }
+          } catch {
+            // ignore JSON parse error
+          }
+          throw new Error(serverErr);
+        }
+      } else {
+        // 2. On static cloud host (GitHub Pages): /api/proxy does not exist.
         const isLocalTarget = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)/i.test(
           normalized
         );
-        if (!isLocalTarget) {
-          const fallbackRes = await fetch(
-            `https://api.allorigins.win/raw?url=${encodeURIComponent(normalized)}`
+        if (isLocalTarget) {
+          throw new Error(
+            'Cannot fetch localhost URLs from a cloud-hosted site (GitHub Pages). Run AccessiVision locally (`npm run dev`) or paste your element in the "2. Paste HTML / React DOM" tab.'
           );
-          if (fallbackRes.ok) {
-            const rawHtml = await fallbackRes.text();
-            const { cleanedHtml, isEmptySpaShell } = sanitizeAndRewriteHtmlForSandbox(
-              rawHtml,
-              normalized
-            );
-            set({
-              currentHtmlDocString: cleanedHtml,
-              isLoadingExternalUrl: false,
-              urlError: null,
-              isEmptySpaShell,
-              selectedIssueId: null,
-              selectedSelector: null,
-              activeFocusStepIndex: null,
-              appliedPatches: [],
-              initialScore: null,
-            });
-            return;
-          }
         }
 
-        throw new Error(serverErr);
+        // Try CORS proxy fallback with an 8-second timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        try {
+          const fallbackRes = await fetch(
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(normalized)}`,
+            { signal: controller.signal }
+          );
+          clearTimeout(timeoutId);
+          if (fallbackRes.ok) {
+            rawHtml = await fallbackRes.text();
+          }
+        } catch {
+          clearTimeout(timeoutId);
+        }
+
+        if (!rawHtml) {
+          throw new Error(
+            `This website blocks cross-origin requests (CORS). On static GitHub Pages, please use the "2. Paste HTML / React DOM" tab to paste and audit this page directly, or run AccessiVision locally via "npm run dev".`
+          );
+        }
       }
 
-      const rawHtml = await res.text();
       const { cleanedHtml, isEmptySpaShell } = sanitizeAndRewriteHtmlForSandbox(
         rawHtml,
         normalized

@@ -47,6 +47,12 @@ export const TopStudioBar: React.FC<TopStudioBarProps> = ({
   const [htmlDraft, setHtmlDraft] = useState('');
   const [copiedSnippet, setCopiedSnippet] = useState(false);
 
+  const isStaticCloudHost =
+    typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1' &&
+    window.location.hostname !== '0.0.0.0';
+
   const activePreset =
     SANDBOX_PRESETS.find((p) => p.id === activePresetId) || SANDBOX_PRESETS[0];
 
@@ -276,6 +282,23 @@ export const TopStudioBar: React.FC<TopStudioBarProps> = ({
                     </button>
                   </div>
                 </div>
+
+                {isStaticCloudHost && (
+                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 leading-relaxed flex items-start gap-2">
+                    <span className="shrink-0 text-sm">💡</span>
+                    <div>
+                      <span className="font-semibold text-amber-100">Running on Static GitHub Pages:</span> Most external websites (like GeeksforGeeks) block third-party browser requests via CORS. For 100% reliable auditing, switch to the{' '}
+                      <button
+                        type="button"
+                        onClick={() => setModalTab('html')}
+                        className="text-teal-300 font-semibold underline hover:text-teal-200 cursor-pointer"
+                      >
+                        "2. Paste HTML / React DOM"
+                      </button>{' '}
+                      tab to paste any webpage HTML directly, or run locally (`npm run dev`) for the Headless Chrome proxy.
+                    </div>
+                  </div>
+                )}
 
                 {/* Quick Presets */}
                 <div className="flex items-center gap-2 text-xs flex-wrap">
