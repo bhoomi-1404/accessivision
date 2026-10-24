@@ -13,6 +13,16 @@ import {
 import { SANDBOX_PRESETS } from '../data/sandboxPresets';
 
 /**
+ * Supabase Edge Function URL for CORS proxy.
+ * Hosted globally on Supabase's edge network (free tier 500k req/mo).
+ * Automatically proxies public websites for all visitors with zero configuration needed.
+ */
+const SUPABASE_CORS_PROXY_URL =
+  (typeof window !== 'undefined' &&
+    (window as unknown as Record<string, string>).__AV_SUPABASE_PROXY__) ||
+  'https://uodkdnptdcdtqgsosvfl.supabase.co/functions/v1/cors-proxy';
+
+/**
  * Cleans fetched or pasted HTML so:
  * 1) <script> tags don't reboot React/MFE inside about:srcdoc and wipe the DOM to white
  * 2) Root-relative /assets/... and self-signed localhost CSS/images route through /api/proxy
@@ -90,10 +100,20 @@ function sanitizeAndRewriteHtmlForSandbox(
     .replace(/<[^>]+>/g, '')
     .trim();
 
+  const isCloudflareOrBotBlocked =
+    html.includes('cf-browser-verification') ||
+    html.includes('challenge-running') ||
+    html.includes('Just a moment...') ||
+    html.includes('cf-turnstile') ||
+    html.includes('Attention Required! | Cloudflare') ||
+    html.includes('Cloudflare Ray ID') ||
+    html.includes('Checking if the site connection is secure');
+
   const isStuckOnLoader =
     hasAuthRequiredMeta ||
+    isCloudflareOrBotBlocked ||
     (bodyInner.includes('LoadingBlock') && textOnly.length < 30) ||
-    textOnly.length < 10;
+    textOnly.length < 80;
 
   return { cleanedHtml: html, isEmptySpaShell: isStuckOnLoader };
 }
@@ -110,6 +130,7 @@ interface StudioState {
   isEmptySpaShell: boolean;
   sourceModalOpen: boolean;
   sourceModalTab: 'url' | 'html';
+  supabaseProxyUrl: string;
 
   // Studio UI Navigation & Overlays
   activeTab: StudioInspectorTab;
@@ -146,6 +167,7 @@ interface StudioState {
   setPreset: (presetId: string) => void;
   setCustomHtml: (html: string) => void;
   loadExternalUrl: (url: string) => Promise<void>;
+  setSupabaseProxyUrl: (url: string) => void;
   openSourceModal: (tab?: 'url' | 'html') => void;
   closeSourceModal: () => void;
   setActiveTab: (tab: StudioInspectorTab) => void;
@@ -188,6 +210,12 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   isEmptySpaShell: false,
   sourceModalOpen: false,
   sourceModalTab: 'url',
+  supabaseProxyUrl:
+    (typeof window !== 'undefined' &&
+      (localStorage.getItem('av_supabase_proxy_url') ||
+        (window as unknown as Record<string, string>).__AV_SUPABASE_PROXY__)) ||
+    SUPABASE_CORS_PROXY_URL ||
+    '',
 
   activeTab: 'issues',
   categoryFilter: 'all',
@@ -217,6 +245,17 @@ export const useStudioStore = create<StudioState>((set, get) => ({
 
   openSourceModal: (tab = 'url') => set({ sourceModalOpen: true, sourceModalTab: tab }),
   closeSourceModal: () => set({ sourceModalOpen: false }),
+  setSupabaseProxyUrl: (url: string) => {
+    const trimmed = url.trim();
+    if (typeof window !== 'undefined') {
+      if (trimmed) {
+        localStorage.setItem('av_supabase_proxy_url', trimmed);
+      } else {
+        localStorage.removeItem('av_supabase_proxy_url');
+      }
+    }
+    set({ supabaseProxyUrl: trimmed });
+  },
 
   setPreset: (presetId) => {
     const found = SANDBOX_PRESETS.find((p) => p.id === presetId) || SANDBOX_PRESETS[0];
@@ -284,6 +323,26 @@ export const useStudioStore = create<StudioState>((set, get) => ({
       // 2. If not running local proxy and target is a public website, attempt CORS proxy fallback chain
       const isLocalTarget = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)/i.test(normalized);
 
+      // Fallback Priority: Supabase Edge Function → corsproxy.io → allorigins.win → codetabs
+      const activeSupabaseProxy = get().supabaseProxyUrl || SUPABASE_CORS_PROXY_URL;
+
+      if (!rawHtml && !isLocalTarget && activeSupabaseProxy) {
+        // Supabase Edge Function (most reliable — your own serverless proxy)
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 8000);
+          const supaRes = await fetch(
+            `${activeSupabaseProxy}?url=${encodeURIComponent(normalized)}`,
+            { signal: controller.signal }
+          );
+          clearTimeout(timer);
+          if (supaRes.ok) {
+            const text = await supaRes.text();
+            if (text && text.length > 60) rawHtml = text;
+          }
+        } catch {}
+      }
+
       if (!rawHtml && !isLocalTarget) {
         // Fallback A: corsproxy.io
         try {
@@ -341,7 +400,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
           );
         }
         throw new Error(
-          `This website blocks automated cross-origin requests (CORS). On static GitHub Pages, click "Paste HTML Code Instead" below to paste and audit this page directly.`
+          `This website blocks automated requests (anti-bot or Cloudflare protection). Click "Paste HTML / React DOM" above to capture and audit this page directly with full CSS.`
         );
       }
 

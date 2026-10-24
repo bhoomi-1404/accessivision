@@ -1,0 +1,7 @@
+# Supabase config (required by Supabase CLI)
+[project]
+id = ""
+# Set this to your Supabase project ref after running: supabase link --project-ref YOUR_PROJECT_REF
+
+[functions.cors-proxy]
+verify_jwt = false

@@ -298,150 +298,127 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[#080C12] overflow-hidden relative">
-      {/* Clean Canvas Toolbar with Plain-English Controls & Tooltips */}
-      <div className="h-12 bg-[#0D131C] border-b border-slate-800 px-5 flex items-center justify-between gap-3 text-xs z-20">
+    <div className="flex-1 flex flex-col bg-[#090A0F] overflow-hidden relative">
+      {/* Clean DevTools Canvas Toolbar */}
+      <div className="h-11 bg-[#0E1017] border-b border-zinc-800 px-4 flex items-center justify-between gap-3 text-xs z-20">
         {/* Left: Visual Overlay Toggles */}
-        <div className="flex items-center gap-2">
-          <span className="text-slate-400 font-medium mr-1 hidden sm:inline">
-            Page Overlays:
+        <div className="flex items-center gap-1.5">
+          <span className="text-zinc-500 text-[11px] font-medium mr-1 hidden sm:inline">
+            Overlays:
           </span>
 
           <InfoTooltip
             title="Keyboard Tab Order Path"
-            description="Draws numbered circles (1, 2, 3...) showing the exact order a keyboard user moves through the page when pressing the Tab key."
-            extraNote="Red dashed lines mean the focus jumps out of order!"
+            description="Draws numbered indicators showing the exact sequential order a keyboard user traverses through the DOM when pressing the Tab key."
+            extraNote="Red dashed connectors flag illogical jumps or keyboard traps."
             align="left"
           >
             <button
               onClick={() => setShowFocusMapOverlay(!showFocusMapOverlay)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 border transition-colors ${
+              className={`px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 border transition-colors ${
                 showFocusMapOverlay
-                  ? 'bg-sky-500/20 text-sky-300 border-sky-500/50'
-                  : 'bg-[#131B26] text-slate-300 border-slate-700/80 hover:border-slate-600'
+                  ? 'bg-zinc-800 text-white border-zinc-600'
+                  : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700'
               }`}
             >
               <Waypoints className="w-3.5 h-3.5 text-sky-400" />
               <span>
-                {showFocusMapOverlay ? 'Hide Tab Order' : 'Show Tab Order'} (
-                {focusStops.length})
+                Focus Order ({focusStops.length})
               </span>
             </button>
           </InfoTooltip>
 
           <InfoTooltip
-            title="Highlight All Accessibility Bugs"
-            description="Draws red/amber boxes around every broken element on the page at once. When turned off, only the issue you hover or click in the right panel is highlighted."
+            title="Highlight Accessibility Violations"
+            description="Outlines broken elements on the page simultaneously. When toggled off, outlines appear only on hover or selection."
             align="left"
           >
             <button
               onClick={() => setShowIssueBoundingBoxes(!showIssueBoundingBoxes)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 border transition-colors ${
+              className={`px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 border transition-colors ${
                 showIssueBoundingBoxes
-                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/50'
-                  : 'bg-[#131B26] text-slate-300 border-slate-700/80 hover:border-slate-600'
+                  ? 'bg-rose-500/15 text-rose-300 border-rose-500/40'
+                  : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700'
               }`}
             >
               <Layers className="w-3.5 h-3.5 text-rose-400" />
               <span>
-                {showIssueBoundingBoxes ? 'Hide Bug Boxes' : 'Show All Bug Boxes'} (
-                {activeBugsCount})
+                Violations ({activeBugsCount})
               </span>
             </button>
           </InfoTooltip>
 
-          <div className="h-4 w-px bg-slate-800 mx-1 hidden sm:block" />
+          <div className="h-4 w-px bg-zinc-800 mx-1 hidden sm:block" />
 
-          <InfoTooltip
-            title="Canvas Width Mode"
-            description="Toggle between 100% full-width responsive canvas (fills the entire available space) and centered 920px device preview."
-            align="left"
+          {/* Canvas Modes */}
+          <button
+            onClick={() => setIsFullWidth(!isFullWidth)}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 border transition-colors ${
+              isFullWidth
+                ? 'bg-zinc-800 text-zinc-200 border-zinc-700'
+                : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700'
+            }`}
+            title="Toggle between 100% full-width canvas and centered 960px device frame"
           >
-            <button
-              onClick={() => setIsFullWidth(!isFullWidth)}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 border transition-colors ${
-                isFullWidth
-                  ? 'bg-teal-500/20 text-teal-300 border-teal-500/50'
-                  : 'bg-[#131B26] text-slate-300 border-slate-700/80 hover:border-slate-600'
-              }`}
-            >
-              {isFullWidth ? (
-                <>
-                  <Maximize2 className="w-3.5 h-3.5 text-teal-400" />
-                  <span>100% Full Space</span>
-                </>
-              ) : (
-                <>
-                  <Minimize2 className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Centered (920px)</span>
-                </>
-              )}
-            </button>
-          </InfoTooltip>
+            {isFullWidth ? (
+              <>
+                <Maximize2 className="w-3.5 h-3.5 text-zinc-400" />
+                <span>100% Width</span>
+              </>
+            ) : (
+              <>
+                <Minimize2 className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Frame (960px)</span>
+              </>
+            )}
+          </button>
 
-          <InfoTooltip
-            title="Height Fitting Mode"
-            description="Fit Content expands the canvas automatically so all cards, tables, and rows fit without getting cut off. 100% Screen locks to the exact visible window height."
-            align="left"
+          <button
+            onClick={() =>
+              setHeightMode(
+                heightMode === 'fit-content' ? 'screen' : 'fit-content'
+              )
+            }
+            className="px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 border bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700 transition-colors"
+            title="Fit Content expands canvas to prevent scrollbars; 100% Screen locks to window height"
           >
-            <button
-              onClick={() =>
-                setHeightMode(
-                  heightMode === 'fit-content' ? 'screen' : 'fit-content'
-                )
-              }
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 border transition-colors ${
-                heightMode === 'fit-content'
-                  ? 'bg-teal-500/20 text-teal-300 border-teal-500/50'
-                  : 'bg-[#131B26] text-slate-300 border-slate-700/80 hover:border-slate-600'
-              }`}
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-teal-400" />
-              <span>
-                {heightMode === 'fit-content'
-                  ? '↕ Fit Content'
-                  : '↕ 100% Screen'}
-              </span>
-            </button>
-          </InfoTooltip>
+            <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400" />
+            <span>
+              {heightMode === 'fit-content' ? 'Fit Content' : 'Fit Screen'}
+            </span>
+          </button>
         </div>
 
         {/* Right: Quick Vision Simulator Dropdown + Split Compare */}
         <div className="flex items-center gap-2">
-          <InfoTooltip
-            title="Vision Deficiency Simulator"
-            description="Simulates how users with Color Blindness (Deuteranopia, Protanopia), Cataracts, or Tunnel Vision see your webpage in real time."
-            align="right"
-          >
-            <div className="flex items-center bg-[#131B26] border border-slate-700/80 rounded-lg px-2.5 py-1.5 gap-2">
-              <Eye className="w-3.5 h-3.5 text-teal-400" />
-              <span className="text-slate-400 hidden md:inline">Vision Filter:</span>
-              <select
-                value={visionMode}
-                onChange={(e) => setVisionMode(e.target.value as typeof visionMode)}
-                aria-label="Simulate Vision Condition"
-                className="bg-transparent text-xs font-semibold text-white focus:outline-none cursor-pointer"
-              >
-                {VISION_MODES.map((m) => (
-                  <option
-                    key={m.id}
-                    value={m.id}
-                    className="bg-[#0F1722] text-slate-100"
-                  >
-                    {m.shortLabel} ({m.prevalence})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </InfoTooltip>
+          <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-md px-2 py-1 gap-1.5">
+            <Eye className="w-3.5 h-3.5 text-zinc-400" />
+            <span className="text-zinc-500 text-[11px] hidden md:inline">Vision:</span>
+            <select
+              value={visionMode}
+              onChange={(e) => setVisionMode(e.target.value as typeof visionMode)}
+              aria-label="Simulate Vision Condition"
+              className="bg-transparent text-xs font-medium text-zinc-200 focus:outline-none cursor-pointer"
+            >
+              {VISION_MODES.map((m) => (
+                <option
+                  key={m.id}
+                  value={m.id}
+                  className="bg-[#12141D] text-zinc-200"
+                >
+                  {m.shortLabel} ({m.prevalence})
+                </option>
+              ))}
+            </select>
+          </div>
 
           {visionMode !== 'normal' && visionMode !== 'glaucoma' && (
             <button
               onClick={() => setSplitVisionCurtain(!splitVisionCurtain)}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 border transition-colors ${
+              className={`px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 border transition-colors ${
                 splitVisionCurtain
-                  ? 'bg-teal-600 text-white border-teal-500'
-                  : 'bg-[#131B26] text-slate-300 border-slate-700 hover:border-slate-500'
+                  ? 'bg-white text-zinc-950 border-white font-semibold'
+                  : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700'
               }`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -451,33 +428,34 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
         </div>
       </div>
 
-      {/* Loading Banner when Headless Chrome is rendering an SPA URL */}
+      {/* Loading Banner */}
       {isLoadingExternalUrl && (
-        <div className="bg-teal-950/90 border-b border-teal-500/40 px-5 py-2.5 text-xs text-teal-200 flex items-center gap-2.5">
-          <div className="w-3.5 h-3.5 rounded-full border-2 border-teal-400 border-t-transparent animate-spin shrink-0" />
+        <div className="bg-zinc-900 border-b border-zinc-700 px-4 py-2 text-xs text-zinc-300 flex items-center gap-2.5">
+          <div className="w-3.5 h-3.5 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin shrink-0" />
           <span>
-            <strong>Rendering Live URL in Headless Chrome:</strong> Executing JavaScript, hydrating React/SPA components, and extracting CSS styles for{' '}
-            <code className="font-mono text-white">{liveUrlInput}</code>...
+            <strong className="text-zinc-100">Connecting to URL:</strong> Hydrating scripts and capturing styles for{' '}
+            <code className="font-mono text-zinc-100">{liveUrlInput}</code>...
           </span>
         </div>
       )}
 
+      {/* URL Error Banner */}
       {urlError && (
-        <div className="bg-rose-950/95 border-b border-rose-500/50 px-5 py-3 text-xs text-rose-100 flex flex-wrap items-center justify-between gap-3 shadow-lg z-30">
-          <div className="flex items-center gap-2.5 max-w-2xl">
+        <div className="bg-[#181116] border-b border-red-500/30 px-4 py-2.5 text-xs text-zinc-200 flex flex-wrap items-center justify-between gap-3 shadow-lg z-30">
+          <div className="flex items-center gap-2 max-w-2xl">
             <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
             <span className="leading-relaxed">
-              <strong className="text-white">Could not load external URL:</strong> {urlError}
+              <strong className="text-rose-300">Could not load external URL:</strong> {urlError}
             </span>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => openSourceModal('html')}
-              className="px-3.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs transition-all flex items-center gap-1.5 shadow-md shadow-teal-600/30"
+              className="px-3 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 font-semibold text-xs transition-all flex items-center gap-1.5 shadow-sm"
             >
               <Code2 className="w-3.5 h-3.5" />
-              <span>📋 Paste HTML Code Instead</span>
+              <span>Paste HTML Directly</span>
             </button>
             <button
               onClick={async () => {
@@ -492,13 +470,13 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
                   openSourceModal('html');
                 }
               }}
-              className="px-3 py-1.5 rounded-lg bg-[#111823] hover:bg-[#172030] border border-slate-700 text-slate-200 font-medium text-xs transition-colors"
+              className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 font-medium text-xs transition-colors"
             >
               Paste from Clipboard
             </button>
             <button
               onClick={() => useStudioStore.setState({ urlError: null })}
-              className="text-slate-400 hover:text-white text-xs px-2 py-1 rounded hover:bg-slate-800"
+              className="text-zinc-400 hover:text-zinc-200 p-1 rounded hover:bg-zinc-800"
               title="Dismiss error"
             >
               ✕
@@ -507,18 +485,16 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
         </div>
       )}
 
-      {/* Slim Non-Blocking Helper Bar if Page Needs Private Login Session */}
+      {/* Helper Bar if Page Needs Session */}
       {isEmptySpaShell && !isLoadingExternalUrl && (
-        <div className="bg-amber-950/90 border-b border-amber-500/40 px-5 py-2.5 text-xs text-amber-100 flex flex-wrap items-center justify-between gap-3">
+        <div className="bg-[#19150E] border-b border-amber-500/30 px-4 py-2 text-xs text-zinc-200 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>
-              <strong>No-Console Way (Avoids Chrome Paste Warning):</strong> In your{' '}
-              <code className="font-mono text-amber-300">{liveUrlInput}</code> DevTools, click the{' '}
-              <strong className="text-white underline">Elements</strong> tab (top-left) → click the top{' '}
-              <code className="font-mono text-teal-300">&lt;html&gt;</code> tag → press{' '}
-              <strong className="text-white">Cmd + C</strong> → come back here and press{' '}
-              <strong className="text-white">Cmd + V</strong>!
+            <span className="text-zinc-300 text-[11px]">
+              <strong>Single-Page App Shell Detected:</strong> In your{' '}
+              <code className="font-mono text-amber-300">{liveUrlInput}</code> DevTools, right-click the top{' '}
+              <code className="font-mono text-zinc-100">&lt;html&gt;</code> tag $\rightarrow$ Copy outerHTML $\rightarrow$ press{' '}
+              <strong className="text-white">Cmd + V</strong> here.
             </span>
           </div>
 
@@ -529,24 +505,20 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
                   setPasteError(null);
                   const text = await navigator.clipboard.readText();
                   if (!text || !text.includes('<')) {
-                    setPasteError(
-                      'Copy the <html> tag from the Elements tab first, or press Cmd+V!'
-                    );
+                    setPasteError('Copy the <html> tag from DevTools first, or press Cmd+V!');
                     return;
                   }
                   setCustomHtml(text);
                 } catch {
-                  setPasteError(
-                    'Just press Cmd + V right now anywhere on this page!'
-                  );
+                  setPasteError('Press Cmd + V directly on this page.');
                 }
               }}
-              className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs transition-colors shadow-sm"
+              className="px-3 py-1 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-medium text-xs transition-colors"
             >
-              📋 Paste Copied &lt;html&gt; Here (or press Cmd + V)
+              Paste Copied DOM
             </button>
             {pasteError && (
-              <span className="text-rose-300 text-[11px] font-medium">{pasteError}</span>
+              <span className="text-rose-400 text-[11px] font-medium">{pasteError}</span>
             )}
           </div>
         </div>
@@ -568,13 +540,13 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
           isFullWidth
             ? 'p-0 flex flex-col items-stretch'
             : 'p-6 flex justify-center items-start'
-        } relative bg-[#080C12] transition-all`}
+        } relative bg-[#090A0F] transition-all`}
       >
         <div
           className={`relative w-full ${
             isFullWidth
               ? 'flex-1 rounded-none border-0'
-              : 'max-w-[920px] rounded-2xl border border-slate-700/80 shadow-2xl'
+              : 'max-w-[960px] rounded-xl border border-zinc-800 shadow-2xl overflow-hidden'
           } bg-white transition-all`}
           style={{
             minHeight: '100%',
@@ -625,7 +597,7 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
                   }}
                 />
                 <div
-                  className="absolute inset-y-0 w-0.5 bg-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.9)] pointer-events-auto cursor-ew-resize flex items-center justify-center"
+                  className="absolute inset-y-0 w-0.5 bg-white shadow-[0_0_12px_rgba(255,255,255,0.7)] pointer-events-auto cursor-ew-resize flex items-center justify-center"
                   style={{ left: `${splitPercent}%` }}
                   onMouseDown={(e) => {
                     e.preventDefault();
@@ -647,8 +619,8 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
                     window.addEventListener('mouseup', upHandler);
                   }}
                 >
-                  <div className="px-2.5 py-1 rounded-full bg-teal-600 text-[10px] font-bold text-white shadow-lg whitespace-nowrap -translate-y-6">
-                    ◀ Normal | {activeVisionConfig.shortLabel} ▶
+                  <div className="px-2.5 py-1 rounded-full bg-zinc-950 border border-zinc-700 text-[10px] font-semibold text-white shadow-lg whitespace-nowrap -translate-y-6">
+                    Normal | {activeVisionConfig.shortLabel}
                   </div>
                 </div>
               </div>
@@ -893,32 +865,26 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
         </div>
       </div>
 
-      {/* Bottom Bar: Simple Keyboard Tester & Screen Reader Output Preview */}
-      <div className="h-14 bg-[#0B0F17] border-t border-slate-800 px-5 flex items-center justify-between gap-4 z-20">
+      {/* Bottom Screen Reader & Tab Stepper Bar */}
+      <div className="h-12 bg-[#0E1017] border-t border-zinc-800 px-4 flex items-center justify-between gap-3 text-xs z-20">
         {/* Left: Step Through Page with Keyboard */}
-        <div className="flex items-center gap-2">
-          <InfoTooltip
-            title="Keyboard Navigation Simulator"
-            description="Many users cannot use a mouse and rely on pressing 'Tab' to move from button to button. Use these buttons to step through the page and see where the cursor goes."
-            align="left"
-          >
-            <span className="text-xs font-semibold text-slate-300 mr-1 hidden sm:inline">
-              Test Keyboard Tab:
-            </span>
-          </InfoTooltip>
+        <div className="flex items-center gap-1.5">
+          <span className="text-zinc-500 text-[11px] font-medium mr-1 hidden sm:inline">
+            Tab Simulation:
+          </span>
 
           <button
             onClick={() => stepKeyboardFocus(-1)}
-            className="px-3 py-1.5 rounded-lg bg-[#131B26] hover:bg-[#1B2636] border border-slate-700 text-xs font-medium text-slate-200 flex items-center gap-1 transition-colors"
+            className="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-medium text-zinc-300 flex items-center gap-1 transition-colors"
             title="Move to previous focusable element (Shift + Tab)"
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-teal-400" />
-            <span>Prev</span>
+            <ArrowLeft className="w-3.5 h-3.5 text-zinc-400" />
+            <span>Shift+Tab</span>
           </button>
 
           <button
             onClick={() => stepKeyboardFocus(1)}
-            className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white flex items-center gap-1.5 transition-colors shadow-sm"
+            className="px-3 py-1 rounded-md bg-white hover:bg-zinc-200 text-xs font-semibold text-zinc-950 flex items-center gap-1.5 transition-colors shadow-sm"
             title="Move to next focusable element (Tab key)"
           >
             <span>Next (Tab)</span>
@@ -930,21 +896,21 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
               if (!showFocusMapOverlay) setShowFocusMapOverlay(true);
               setIsAutoPlayingFocus(!isAutoPlayingFocus);
             }}
-            className={`px-3 py-1.5 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-colors ${
+            className={`px-2.5 py-1 rounded-md border text-xs font-medium flex items-center gap-1.5 transition-colors ${
               isAutoPlayingFocus
-                ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-                : 'bg-[#131B26] hover:bg-[#1B2636] border-slate-700 text-slate-300'
+                ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-300'
             }`}
           >
             {isAutoPlayingFocus ? (
               <>
                 <Pause className="w-3.5 h-3.5" />
-                <span>Stop</span>
+                <span>Pause</span>
               </>
             ) : (
               <>
-                <Play className="w-3.5 h-3.5 text-teal-400" />
-                <span>Auto-Walk</span>
+                <Play className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Auto-Step</span>
               </>
             )}
           </button>
@@ -952,59 +918,56 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
           <button
             onClick={triggerEnterOnFocused}
             disabled={!activeFocusStepIndex}
-            className="px-2.5 py-1.5 rounded-lg bg-[#131B26] hover:bg-[#1B2636] disabled:opacity-40 border border-slate-700 text-xs text-slate-300 hidden lg:flex items-center gap-1"
+            className="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 disabled:opacity-40 border border-zinc-800 text-xs text-zinc-300 hidden lg:flex items-center gap-1"
             title="Press Enter on the focused element"
           >
             <CornerDownLeft className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Click Element</span>
+            <span>Trigger Click</span>
           </button>
         </div>
 
         {/* Right: What a Blind User Hears (Screen Reader Box) */}
         <div className="flex items-center gap-2.5 flex-1 justify-end min-w-0">
-          <div className="flex items-center gap-2.5 bg-[#111823] border border-slate-800 rounded-xl px-3.5 py-1.5 max-w-xl w-full min-w-0">
-            <GlossaryBadge
-              termKey="VoiceOver"
-              displayText="Screen Reader Speaks:"
-              className="text-[11px] font-semibold text-teal-300 shrink-0"
-              align="right"
-            />
+          <div className="flex items-center gap-2 bg-zinc-900/90 border border-zinc-800 rounded-lg px-3 py-1 max-w-lg w-full min-w-0">
+            <span className="text-[11px] font-semibold text-zinc-300 shrink-0">
+              Screen Reader:
+            </span>
             {latestAnnouncement ? (
-              <div className="truncate text-xs text-white flex items-center gap-2 min-w-0">
-                <span className="truncate font-medium">
-                  “{latestAnnouncement.voiceOverOutput}”
+              <div className="truncate text-xs text-zinc-200 flex items-center gap-2 min-w-0">
+                <span className="truncate font-mono text-[11px]">
+                  &ldquo;{latestAnnouncement.voiceOverOutput}&rdquo;
                 </span>
                 {latestAnnouncement.warning && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 shrink-0 font-semibold">
-                    Missing Label!
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 shrink-0 font-medium">
+                    Missing Label
                   </span>
                 )}
               </div>
             ) : (
-              <span className="text-xs text-slate-400 truncate">
-                Click <strong>Next (Tab)</strong> to see what a screen reader reads aloud
+              <span className="text-xs text-zinc-500 truncate">
+                Press <strong>Next (Tab)</strong> to inspect synthesized voice output
               </span>
             )}
           </div>
 
           <InfoTooltip
-            title="Read Aloud with Browser Voice"
-            description="Turn this on to hear your computer actually speak each element aloud as you step through the page."
+            title="Spoken Speech Synthesis"
+            description="Uses Web Speech API to vocalize live screen-reader announcements as you step through the focus tree."
             align="right"
           >
             <button
               onClick={() => setVoiceSynthEnabled(!voiceSynthEnabled)}
-              className={`p-2 rounded-xl border transition-colors shrink-0 ${
+              className={`p-1.5 rounded-lg border transition-colors shrink-0 ${
                 voiceSynthEnabled
-                  ? 'bg-teal-600/25 border-teal-500 text-teal-300'
-                  : 'bg-[#131B26] border-slate-700 text-slate-400 hover:text-slate-200'
+                  ? 'bg-zinc-800 border-zinc-600 text-white'
+                  : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'
               }`}
               aria-label="Toggle Spoken Audio"
             >
               {voiceSynthEnabled ? (
-                <Volume2 className="w-4 h-4" />
+                <Volume2 className="w-3.5 h-3.5" />
               ) : (
-                <VolumeX className="w-4 h-4" />
+                <VolumeX className="w-3.5 h-3.5" />
               )}
             </button>
           </InfoTooltip>

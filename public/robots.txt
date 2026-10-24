@@ -1,0 +1,7 @@
+# AccessiVision Robots.txt
+# https://bhoomi-1404.github.io/accessivision/
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://bhoomi-1404.github.io/accessivision/sitemap.xml

@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import {
-  Activity,
   ArrowLeft,
   Check,
+  CheckCheck,
+  ChevronDown,
   Code2,
   Copy,
+  FileCode,
   GitCompare,
   Globe,
+  Layers,
+  Lightbulb,
   RotateCcw,
-  Sparkles,
-  Wand2,
+  ScanEye,
+  X,
 } from 'lucide-react';
 import { useStudioStore } from '../store/useStudioStore';
 import { SANDBOX_PRESETS } from '../data/sandboxPresets';
@@ -58,10 +62,10 @@ export const TopStudioBar: React.FC<TopStudioBarProps> = ({
 
   const scoreBadgeStyle =
     score >= 90
-      ? 'text-emerald-300 border-emerald-500/40 bg-emerald-500/10'
+      ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10'
       : score >= 65
-      ? 'text-amber-300 border-amber-500/40 bg-amber-500/10'
-      : 'text-rose-300 border-rose-500/40 bg-rose-500/10';
+      ? 'text-amber-400 border-amber-500/30 bg-amber-500/10'
+      : 'text-rose-400 border-rose-500/30 bg-rose-500/10';
 
   const handleUrlSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,114 +77,106 @@ export const TopStudioBar: React.FC<TopStudioBarProps> = ({
 
   return (
     <>
-      <header className="h-16 border-b border-slate-800 bg-[#0B0F17] px-5 flex items-center justify-between gap-4 select-none z-30">
-        {/* Left: Clean Brand Identity (Teal/Emerald Theme) */}
-        <div className="flex items-center gap-2.5">
+      <header className="h-14 border-b border-zinc-800 bg-[#0E1017] px-4 flex items-center justify-between gap-4 select-none z-30">
+        {/* Left: Professional Logo & Breadcrumb */}
+        <div className="flex items-center gap-3">
           {onNavigateHome && (
             <button
               onClick={onNavigateHome}
               title="Return to Landing Page"
-              className="px-2.5 py-1.5 rounded-xl bg-[#111823] hover:bg-[#172030] text-slate-300 hover:text-white border border-slate-800 transition-colors flex items-center gap-1.5 text-xs font-medium"
+              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 border border-zinc-800 transition-colors flex items-center gap-1.5 text-xs font-medium"
             >
-              <ArrowLeft className="w-3.5 h-3.5 text-teal-400" />
-              <span className="hidden sm:inline">Landing</span>
+              <ArrowLeft className="w-3.5 h-3.5" />
             </button>
           )}
 
           <div
             onClick={onNavigateHome}
-            className={`flex items-center gap-3 ${onNavigateHome ? 'cursor-pointer group' : ''}`}
+            className={`flex items-center gap-2.5 ${onNavigateHome ? 'cursor-pointer group' : ''}`}
             title={onNavigateHome ? 'Back to Landing Page' : undefined}
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-teal-500/20 border border-white/15 group-hover:scale-105 transition-transform">
-              <Activity className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-[#090A0F] border border-zinc-800 flex items-center justify-center text-zinc-100 group-hover:scale-105 transition-transform shadow-sm">
+              <ScanEye className="w-4 h-4" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-base tracking-tight text-white group-hover:text-teal-300 transition-colors">
-                  AccessiVision
-                </span>
-                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/30">
-                  Live Studio
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 hidden sm:block">
-                Visual keyboard flow, contrast &amp; screen-reader inspector
-              </p>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-sm tracking-tight text-zinc-100 group-hover:text-white transition-colors">
+                AccessiVision
+              </span>
+              <span className="text-[10px] font-medium tracking-wide uppercase px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700/60">
+                Studio
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Center: Target Switcher + Two Explicit Actions: Load URL and Paste HTML */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 bg-[#111823] border border-slate-800 rounded-xl px-3 py-1.5">
-            <span className="text-xs text-slate-400 font-medium hidden sm:inline">Target:</span>
-            <select
-              value={targetMode === 'preset' ? activePresetId : 'custom'}
-              onChange={(e) => {
-                if (e.target.value === 'custom') {
-                  openSourceModal('url');
-                } else {
-                  setPreset(e.target.value);
-                }
-              }}
-              aria-label="Select Demo Application to Audit"
-              className="bg-transparent text-xs font-semibold text-white focus:outline-none cursor-pointer pr-1"
+        {/* Center: Unified Omnibar / Target Selector */}
+        <div className="flex items-center gap-2 max-w-md w-full justify-center">
+          <div className="flex items-center gap-2 bg-zinc-900/90 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-lg px-3 py-1.5 transition-all w-full max-w-sm">
+            {targetMode === 'preset' ? (
+              <Layers className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+            ) : targetMode === 'url' ? (
+              <Globe className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+            ) : (
+              <FileCode className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            )}
+
+            <div className="flex-1 min-w-0">
+              <select
+                value={targetMode === 'preset' ? activePresetId : 'custom'}
+                onChange={(e) => {
+                  if (e.target.value === 'custom') {
+                    openSourceModal('url');
+                  } else {
+                    setPreset(e.target.value);
+                  }
+                }}
+                aria-label="Select Target Application"
+                className="w-full bg-transparent text-xs font-medium text-zinc-200 focus:outline-none cursor-pointer truncate pr-2"
+              >
+                <optgroup label="Sample Test Scenarios" className="bg-[#12141C] text-zinc-300">
+                  {SANDBOX_PRESETS.map((preset) => (
+                    <option key={preset.id} value={preset.id}>
+                      {preset.name} ({preset.badge})
+                    </option>
+                  ))}
+                </optgroup>
+                {targetMode !== 'preset' && (
+                  <optgroup label="Active Custom Source" className="bg-[#12141C] text-zinc-200">
+                    <option value="custom">
+                      {targetMode === 'url' ? liveUrlInput : 'Pasted DOM / HTML'}
+                    </option>
+                  </optgroup>
+                )}
+              </select>
+            </div>
+
+            <button
+              onClick={() => openSourceModal('url')}
+              title="Change Source: Load URL or Paste HTML"
+              className="text-[11px] font-medium text-zinc-400 hover:text-white flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded hover:bg-zinc-800 transition-colors"
             >
-              {SANDBOX_PRESETS.map((preset) => (
-                <option
-                  key={preset.id}
-                  value={preset.id}
-                  className="bg-[#0F1722] text-slate-100"
-                >
-                  {preset.name} ({preset.badge})
-                </option>
-              ))}
-              {targetMode !== 'preset' && (
-                <option value="custom" className="bg-[#0F1722] text-teal-300">
-                  Custom URL / Pasted HTML
-                </option>
-              )}
-            </select>
+              <span>Change</span>
+              <ChevronDown className="w-3 h-3 text-zinc-500" />
+            </button>
           </div>
-
-          <button
-            onClick={() => openSourceModal('url')}
-            title="Load a live website URL or local development server"
-            className="px-3 py-2 rounded-xl text-xs font-medium bg-[#111823] hover:bg-[#172030] border border-slate-700/80 text-slate-200 hover:text-white transition-colors flex items-center gap-1.5"
-          >
-            <Globe className="w-3.5 h-3.5 text-teal-400" />
-            <span>Load URL</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setHtmlDraft(activePreset.htmlContent);
-              openSourceModal('html');
-            }}
-            title="Paste any HTML code or copied element from DevTools"
-            className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#111823] hover:bg-[#172030] border border-teal-500/40 text-teal-300 hover:text-white transition-colors flex items-center gap-1.5 shadow-sm"
-          >
-            <Code2 className="w-3.5 h-3.5 text-teal-400" />
-            <span>Paste HTML</span>
-          </button>
         </div>
 
-        {/* Right: Clear Health Score (with Tooltip) + One-Click Fix All */}
-        <div className="flex items-center gap-3">
+        {/* Right: Real-time Compliance Score & Actions */}
+        <div className="flex items-center gap-2.5">
           <InfoTooltip
-            title="Accessibility Health Score (0–100)"
-            description="Calculated in real time from active keyboard traps, missing screen-reader labels, and low-contrast text on the page."
-            extraNote="Click 'Fix All Issues' to patch the live webpage and watch the score reach 100/100."
+            title="Accessibility Compliance Score (0–100)"
+            description="Evaluated in real-time from automated WCAG 2.1 checks: keyboard traps, missing ARIA semantics, and APCA color contrast ratios."
+            extraNote="Click 'Remediate All' to apply DOM patches and verify compliance."
             align="right"
           >
             <div
-              className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 ${scoreBadgeStyle}`}
+              className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 text-xs font-mono font-medium ${scoreBadgeStyle}`}
             >
-              <span className="text-xs text-slate-300 font-medium">Score:</span>
-              <span className="text-sm font-bold font-mono">{score}/100</span>
+              <span className="text-[11px] font-sans text-zinc-400">Score</span>
+              <span className="font-bold">{score}</span>
+              <span className="text-zinc-500">/100</span>
               {scoreDelta > 0 && (
-                <span className="text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">
+                <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 px-1 py-0.2 rounded ml-0.5">
                   +{scoreDelta}
                 </span>
               )}
@@ -190,119 +186,107 @@ export const TopStudioBar: React.FC<TopStudioBarProps> = ({
           {unpatchedCount > 0 ? (
             <button
               onClick={onApplyAllFixes}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-500 text-white shadow-md shadow-teal-600/20 flex items-center gap-2 transition-all"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 active:bg-zinc-300 text-zinc-950 shadow-sm flex items-center gap-1.5 transition-all"
             >
-              <Wand2 className="w-4 h-4" />
-              <span>Fix All {unpatchedCount} Issues</span>
+              <CheckCheck className="w-3.5 h-3.5" />
+              <span>Remediate All ({unpatchedCount})</span>
             </button>
           ) : (
             <button
               onClick={() => setActiveTab('git-diff')}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30 flex items-center gap-2 transition-all"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 flex items-center gap-1.5 transition-all"
             >
-              <GitCompare className="w-4 h-4" />
-              <span>View Code Changes ({appliedPatches.length})</span>
+              <GitCompare className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Review Patch ({appliedPatches.length})</span>
             </button>
           )}
 
           {appliedPatches.length > 0 && (
             <button
               onClick={onResetSandbox}
-              className="px-2.5 py-2 rounded-xl bg-[#111823] border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-colors flex items-center gap-1 text-xs"
-              title="Reset page back to original state with bugs"
+              className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 transition-colors"
+              title="Reset sandbox to initial state with bugs"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Reset</span>
             </button>
           )}
         </div>
       </header>
 
-      {/* Unified Modal: Test Localhost, External URL, or Paste Custom HTML */}
+      {/* Unified Source Modal */}
       {sourceModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0F1520] border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl">
+          <div className="bg-[#12141D] border border-zinc-800 rounded-xl max-w-lg w-full p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-base font-bold text-white">
-                  Test Your Own Webpage or Component
+                <h2 className="text-sm font-semibold text-zinc-100">
+                  Select Target to Audit
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Load a live URL, connect a local dev server, or paste HTML code directly.
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Inspect a live URL, local dev server, or pasted DOM snapshot.
                 </p>
               </div>
               <button
                 onClick={closeSourceModal}
-                className="text-slate-400 hover:text-white text-sm px-2 py-1"
+                className="text-zinc-400 hover:text-zinc-200 p-1 rounded-md hover:bg-zinc-800 transition-colors"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Modal Mode Switcher */}
-            <div className="grid grid-cols-2 gap-2 bg-[#090D14] p-1 rounded-xl border border-slate-800 mb-4">
+            {/* Modal Segmented Tabs */}
+            <div className="grid grid-cols-2 gap-1 bg-[#0A0C11] p-1 rounded-lg border border-zinc-800/80 mb-4">
               <button
                 onClick={() => openSourceModal('url')}
-                className={`py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-colors ${
+                className={`py-1.5 rounded-md text-xs font-medium flex items-center justify-center gap-2 transition-colors ${
                   sourceModalTab === 'url'
-                    ? 'bg-teal-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
-                <Globe className="w-3.5 h-3.5" />
-                <span>1. Localhost or Live URL</span>
+                <Globe className="w-3.5 h-3.5 text-sky-400" />
+                <span>Live URL / Localhost</span>
               </button>
               <button
                 onClick={() => openSourceModal('html')}
-                className={`py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-colors ${
+                className={`py-1.5 rounded-md text-xs font-medium flex items-center justify-center gap-2 transition-colors ${
                   sourceModalTab === 'html'
-                    ? 'bg-teal-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
-                <Code2 className="w-3.5 h-3.5" />
-                <span>2. Paste HTML / React DOM</span>
+                <Code2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Paste HTML / DOM</span>
               </button>
             </div>
 
             {sourceModalTab === 'url' ? (
               <form onSubmit={handleUrlSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                    Enter Localhost Port or Public Website URL
+                  <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                    Website or Localhost URL
                   </label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={urlField}
                       onChange={(e) => setUrlField(e.target.value)}
-                      placeholder="http://localhost:3000 or https://example.com"
-                      className="flex-1 rounded-xl bg-[#090D14] border border-slate-700 px-3.5 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-teal-500"
+                      placeholder="https://example.com or http://localhost:3000"
+                      className="flex-1 rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 text-xs font-mono text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-400 focus:border-zinc-400"
                     />
                     <button
                       type="submit"
                       disabled={isLoadingExternalUrl}
-                      className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold shrink-0"
+                      className="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold shrink-0 transition-colors disabled:opacity-50"
                     >
-                      {isLoadingExternalUrl ? 'Loading...' : 'Load URL'}
+                      {isLoadingExternalUrl ? 'Connecting...' : 'Load URL'}
                     </button>
                   </div>
                 </div>
 
                 {/* Quick Presets */}
                 <div className="flex items-center gap-2 text-xs flex-wrap">
-                  <span className="text-slate-400">Quick fill &amp; Load:</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUrlField('https://example.com');
-                      loadExternalUrl('https://example.com');
-                      closeSourceModal();
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-teal-600 text-teal-300 hover:text-white font-mono text-[11px] transition-colors"
-                  >
-                    https://example.com
-                  </button>
+                  <span className="text-zinc-400 text-[11px]">Quick samples:</span>
                   <button
                     type="button"
                     onClick={() => {
@@ -310,129 +294,93 @@ export const TopStudioBar: React.FC<TopStudioBarProps> = ({
                       loadExternalUrl('https://news.ycombinator.com');
                       closeSourceModal();
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-teal-600 text-teal-300 hover:text-white font-mono text-[11px] transition-colors"
+                    className="px-2 py-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 font-mono text-[11px] border border-zinc-700/60 transition-colors"
                   >
-                    https://news.ycombinator.com
+                    news.ycombinator.com
                   </button>
                   <button
                     type="button"
                     onClick={() => {
-                      setUrlField('https://localhost:8030/manage/sites');
-                      loadExternalUrl('https://localhost:8030/manage/sites');
+                      setUrlField('https://example.com');
+                      loadExternalUrl('https://example.com');
                       closeSourceModal();
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-teal-600 text-teal-300 hover:text-white font-mono text-[11px] transition-colors"
+                    className="px-2 py-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 font-mono text-[11px] border border-zinc-700/60 transition-colors"
                   >
-                    https://localhost:8030
+                    example.com
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUrlField('http://localhost:3000');
+                      loadExternalUrl('http://localhost:3000');
+                      closeSourceModal();
+                    }}
+                    className="px-2 py-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 font-mono text-[11px] border border-zinc-700/60 transition-colors"
+                  >
+                    localhost:3000
                   </button>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300 space-y-1.5 leading-relaxed">
-                  <div className="font-semibold text-teal-300">
-                    💡 Auditing a Logged-In Local React / MFE App (like localhost:8030):
+                <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-400 space-y-1.5 leading-relaxed">
+                  <div className="flex items-center gap-1.5 text-zinc-200 font-medium">
+                    <Lightbulb className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>Auditing Authenticated or Single Page Apps:</span>
                   </div>
-                  <p>
-                    Logged-in Single Page Apps return an empty <code className="text-amber-300 font-mono">&lt;div id=&quot;app&quot;&gt;&lt;/div&gt;</code> when fetched by URL alone because they need your browser&apos;s login cookies. Click below to copy the <strong>Smart DOM + CSS Capture Command</strong>, run it in your app&apos;s DevTools Console, and paste it in the <strong>2. Paste HTML / React DOM</strong> tab!
+                  <p className="text-[11px]">
+                    Pages requiring login sessions render blank when loaded by URL alone. You can copy any live element directly from your browser DevTools and paste it into the <strong>Paste HTML / DOM</strong> tab.
                   </p>
                   <button
                     type="button"
                     onClick={() => {
                       navigator.clipboard.writeText(
-                        `(()=>{const d=document.documentElement.cloneNode(true);d.querySelectorAll('script,.ReactQueryDevtools').forEach(s=>s.remove());let c='';for(const s of document.styleSheets){try{for(const r of s.cssRules)c+=r.cssText+'\\n'}catch{}}const st=document.createElement('style');st.textContent=c;d.querySelector('head')?.appendChild(st);const html='<base href="'+location.origin+'/">'+d.outerHTML;try{copy(html)}catch{}fetch('${window.location.origin}/api/push-dom',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:location.href,html})}).then(()=>console.log('✅ Sent page to AccessiVision Studio!')).catch(()=>{});})();`
+                        `(()=>{const d=document.documentElement.cloneNode(true);d.querySelectorAll('script,.ReactQueryDevtools').forEach(s=>s.remove());let c='';for(const s of document.styleSheets){try{for(const r of s.cssRules)c+=r.cssText+'\\n'}catch{}}const st=document.createElement('style');st.textContent=c;d.querySelector('head')?.appendChild(st);const html='<base href="'+location.origin+'/">'+d.outerHTML;try{copy(html)}catch{}fetch('${window.location.origin}/api/push-dom',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:location.href,html})}).then(()=>console.log('✅ AccessiVision DOM push complete!')).catch(()=>{});})();`
                       );
                       setCopiedSnippet(true);
-                      setTimeout(() => setCopiedSnippet(false), 1800);
+                      setTimeout(() => setCopiedSnippet(false), 2000);
                     }}
-                    className="mt-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-teal-600 text-white text-[11px] font-medium"
+                    className="mt-1 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-medium transition-colors"
                   >
                     {copiedSnippet
-                      ? '✓ Copied! Paste in Your App Console & Hit Enter'
-                      : 'Copy Auto-Send Console Command'}
+                      ? 'Copied to Clipboard! Paste in Console & Hit Enter'
+                      : 'Copy Full Page Snapshot Script'}
                   </button>
                 </div>
               </form>
             ) : (
-              <div className="space-y-3.5">
-                {/* 3-Step Copy-Paste Guide with 1-Click CSS Capture */}
-                <div className="p-3.5 rounded-xl bg-[#090D14] border border-teal-500/30 text-xs space-y-2.5">
-                  <div className="flex items-center gap-2 font-semibold text-teal-300">
-                    <Sparkles className="w-3.5 h-3.5 text-teal-400" />
-                    <span>How to Capture an Element or Page with 100% of its CSS:</span>
+              <div className="space-y-3">
+                <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-400 space-y-1">
+                  <div className="text-zinc-200 font-medium flex items-center gap-1.5">
+                    <Lightbulb className="w-3.5 h-3.5 text-zinc-300" />
+                    <span>Capture Any Element with Styles:</span>
                   </div>
-
-                  <p className="text-slate-300 text-[11px] leading-relaxed">
-                    If you only copy a single <code className="text-amber-300 font-mono">&lt;div&gt;</code> without its stylesheets, CSS classes will be unstyled. Use one of these quick 1-click methods:
+                  <p className="text-[11px]">
+                    In Chrome/Safari DevTools Elements tab, right-click any element $\rightarrow$ <em>Copy</em> $\rightarrow$ <em>Copy outerHTML</em>, then paste it below.
                   </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          `(()=>{const d=document.documentElement.cloneNode(true);d.querySelectorAll('script,.ReactQueryDevtools').forEach(s=>s.remove());let c='';for(const s of document.styleSheets){try{for(const r of s.cssRules)c+=r.cssText+'\\n'}catch{}}const st=document.createElement('style');st.textContent=c;d.querySelector('head')?.appendChild(st);const html='<base href="'+location.origin+'/">'+d.outerHTML;try{copy(html)}catch{}console.log('✅ AccessiVision: Full page + CSS copied to clipboard! Switch back and press Cmd+V.');})();`
-                        );
-                        setCopiedSnippet(true);
-                        setTimeout(() => setCopiedSnippet(false), 2000);
-                      }}
-                      className="p-2 rounded-lg bg-slate-800 hover:bg-teal-600/30 border border-slate-700 hover:border-teal-500/50 text-left transition-colors"
-                    >
-                      <div className="text-[11px] font-semibold text-teal-300 flex items-center justify-between">
-                        <span>1. Capture Full Page + All CSS</span>
-                        <Copy className="w-3 h-3 text-teal-400" />
-                      </div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">
-                        {copiedSnippet ? '✓ Copied! Run in console & press Cmd+V' : 'Copy console snippet for full app'}
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          `(()=>{const target=window.$0||document.body;const d=target.cloneNode(true);let c='';for(const s of document.styleSheets){try{for(const r of s.cssRules)c+=r.cssText+'\\n'}catch{}}const st=document.createElement('style');st.textContent=c;const wrap=document.createElement('div');wrap.appendChild(st);wrap.appendChild(d);const html='<base href="'+location.origin+'/">'+wrap.innerHTML;try{copy(html)}catch{}console.log('✅ AccessiVision: Inspected element + CSS copied! Switch back and press Cmd+V.');})();`
-                        );
-                        setCopiedSnippet(true);
-                        setTimeout(() => setCopiedSnippet(false), 2000);
-                      }}
-                      className="p-2 rounded-lg bg-slate-800 hover:bg-teal-600/30 border border-slate-700 hover:border-teal-500/50 text-left transition-colors"
-                    >
-                      <div className="text-[11px] font-semibold text-teal-300 flex items-center justify-between">
-                        <span>2. Capture Selected Element ($0) + CSS</span>
-                        <Copy className="w-3 h-3 text-teal-400" />
-                      </div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">
-                        {copiedSnippet ? '✓ Copied! Run in console & press Cmd+V' : 'Inspect any element in DevTools ($0)'}
-                      </div>
-                    </button>
-                  </div>
-
-                  <div className="text-[10px] text-slate-400 flex items-center gap-1.5 pt-0.5">
-                    <span>💡 <strong>No console command needed?</strong> In DevTools Elements tab, simply click the top <code className="text-teal-300 font-mono">&lt;html&gt;</code> tag, press <strong className="text-white">Cmd + C</strong>, and paste it here!</span>
-                  </div>
                 </div>
 
-                {/* Quick Sample Presets */}
+                {/* Sample Snippets */}
                 <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                  <span className="text-slate-400 text-[11px]">Or load a sample element:</span>
+                  <span className="text-zinc-400 text-[11px]">Sample snippets:</span>
                   <button
                     type="button"
                     onClick={() =>
                       setHtmlDraft(
-                        '<div class="p-6 bg-slate-900 rounded-xl text-center"><h3 class="text-white font-bold mb-2">Checkout</h3><button style="background: #1e293b; color: #475569; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: 1px solid #334155;">Confirm Payment (Fails Contrast)</button></div>'
+                        '<div class="p-6 bg-zinc-900 rounded-xl text-center"><h3 class="text-white font-bold mb-2">Checkout</h3><button style="background: #1e293b; color: #475569; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: 1px solid #334155;">Confirm Payment (Fails Contrast)</button></div>'
                       )
                     }
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 text-[11px] font-mono transition-colors"
+                    className="px-2 py-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 text-[11px] font-mono border border-zinc-700/60 transition-colors"
                   >
-                    Faint Button
+                    Low Contrast Button
                   </button>
                   <button
                     type="button"
                     onClick={() =>
                       setHtmlDraft(
-                        '<div class="p-6 bg-slate-900 rounded-xl"><div onclick="alert(\'Closed\')" style="display:inline-block; background:#3b82f6; color:#fff; padding:8px 16px; border-radius:6px; cursor:pointer;">Dismiss Modal (Untabbable Div)</div></div>'
+                        '<div class="p-6 bg-zinc-900 rounded-xl"><div onclick="alert(\'Closed\')" style="display:inline-block; background:#3b82f6; color:#fff; padding:8px 16px; border-radius:6px; cursor:pointer;">Dismiss Modal (Untabbable Div)</div></div>'
                       )
                     }
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 text-[11px] font-mono transition-colors"
+                    className="px-2 py-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 text-[11px] font-mono border border-zinc-700/60 transition-colors"
                   >
                     Untabbable Div
                   </button>
@@ -440,12 +388,12 @@ export const TopStudioBar: React.FC<TopStudioBarProps> = ({
                     type="button"
                     onClick={() =>
                       setHtmlDraft(
-                        '<div class="p-6 bg-slate-900 rounded-xl space-y-3"><input type="search" placeholder="Search products..." style="background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; width:100%;" /><p style="color:#64748b; font-size:12px;">Missing accessible label for screen readers</p></div>'
+                        '<div class="p-6 bg-zinc-900 rounded-xl space-y-3"><input type="search" placeholder="Search..." style="background:#18181b; border:1px solid #3f3f46; color:#fff; padding:10px; border-radius:8px; width:100%;" /><p style="color:#71717a; font-size:12px;">Missing accessible form label</p></div>'
                       )
                     }
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 text-[11px] font-mono transition-colors"
+                    className="px-2 py-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 text-[11px] font-mono border border-zinc-700/60 transition-colors"
                   >
-                    Ghost Input
+                    Unlabeled Input
                   </button>
                 </div>
 
@@ -454,10 +402,9 @@ export const TopStudioBar: React.FC<TopStudioBarProps> = ({
                     value={htmlDraft}
                     onChange={(e) => setHtmlDraft(e.target.value)}
                     rows={8}
-                    className="w-full rounded-xl bg-[#090D14] border border-slate-700 p-3.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-teal-500 placeholder:text-slate-600"
-                    placeholder="Paste copied element outerHTML here (e.g. <button class=&quot;...&quot;>Submit</button>)..."
+                    className="w-full rounded-lg bg-zinc-900 border border-zinc-700 p-3 text-xs font-mono text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400 focus:border-zinc-400 placeholder:text-zinc-600"
+                    placeholder="Paste copied element HTML here..."
                   />
-                  {/* Paste from Clipboard quick button */}
                   <button
                     type="button"
                     onClick={() => {
@@ -467,22 +414,22 @@ export const TopStudioBar: React.FC<TopStudioBarProps> = ({
                         });
                       }
                     }}
-                    className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-teal-600 text-slate-300 hover:text-white text-[11px] font-medium border border-slate-700 transition-colors flex items-center gap-1.5"
+                    className="absolute top-2.5 right-2.5 px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[11px] font-medium border border-zinc-700 transition-colors flex items-center gap-1"
                   >
-                    <Copy className="w-3 h-3 text-teal-400" />
-                    <span>Paste Clipboard</span>
+                    <Copy className="w-3 h-3" />
+                    <span>Paste</span>
                   </button>
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[11px] text-slate-400">
-                    {htmlDraft.trim() ? `${htmlDraft.length} characters ready to audit` : 'Awaiting pasted HTML'}
+                  <span className="text-[11px] text-zinc-500">
+                    {htmlDraft.trim() ? `${htmlDraft.length} chars ready` : 'Awaiting HTML input'}
                   </span>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={closeSourceModal}
-                      className="px-4 py-2 rounded-xl text-xs font-medium bg-slate-800 text-slate-300 hover:text-white transition-colors"
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
                     >
                       Cancel
                     </button>
@@ -495,10 +442,9 @@ export const TopStudioBar: React.FC<TopStudioBarProps> = ({
                           closeSourceModal();
                         }
                       }}
-                      className="px-5 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-500 text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-teal-600/20 transition-all flex items-center gap-2"
+                      className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-zinc-950 disabled:opacity-50 transition-colors shadow-sm"
                     >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Audit Element in Studio</span>
+                      Load into Studio
                     </button>
                   </div>
                 </div>

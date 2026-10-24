@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Dark Squircle Container (Identical to w-8 h-8 rounded-lg bg-[#090A0F] border border-zinc-800) -->
+  <rect width="32" height="32" rx="8" fill="#090A0F" />
+  <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" fill="none" stroke="#27272A" stroke-width="1" />
+
+  <!-- Exact ScanEye Icon Geometry (text-zinc-100 / #F4F4F5 crisp stroke) -->
+  <g transform="translate(4, 4)" fill="none" stroke="#F4F4F5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Outer Corner Brackets -->
+    <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+    <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+    <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+    <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+
+    <!-- Center Eye Arc -->
+    <path d="M18.944 12.33a1 1 0 0 0 0-.66 7.5 7.5 0 0 0-13.888 0 1 1 0 0 0 0 .66 7.5 7.5 0 0 0 13.888 0" />
+
+    <!-- Center Pupil (Matches Lucide ScanEye circle) -->
+    <circle cx="12" cy="12" r="1" fill="#F4F4F5" />
+  </g>
+</svg>

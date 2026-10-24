@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   AlertCircle,
+  AlertTriangle,
   ArrowLeft,
   Check,
   CheckCircle2,
@@ -14,9 +15,8 @@ import {
   Keyboard,
   Palette,
   RotateCcw,
-  Sparkles,
   Volume2,
-  Wand2,
+  Wrench,
 } from 'lucide-react';
 import { useStudioStore } from '../store/useStudioStore';
 import {
@@ -25,7 +25,7 @@ import {
   StudioInspectorTab,
 } from '../types/a11y';
 import { VISION_MODES } from '../engine/visionConfigs';
-import { GlossaryBadge, InfoTooltip } from './InfoTooltip';
+import { GlossaryBadge } from './InfoTooltip';
 
 interface InspectorPanelProps {
   width?: number;
@@ -93,7 +93,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 
   const generateUnifiedGitDiff = () => {
     if (appliedPatches.length === 0) {
-      return '# No fixes applied yet.\n# Click "Fix This Issue" on any bug card to see the exact code changes here.';
+      return '# No fixes applied yet.\n# Click "Apply Fix" on any issue card to preview the code patch here.';
     }
     const lines: string[] = [
       'diff --git a/src/components/Page.tsx b/src/components/Page.tsx',
@@ -101,7 +101,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
       '+++ b/src/components/Page.tsx',
     ];
     appliedPatches.forEach((p, i) => {
-      lines.push(`\n@@ -${(i + 1) * 10},2 +${(i + 1) * 10},2 @@ /* Fix: ${p.summary} */`);
+      lines.push(`\n@@ -${(i + 1) * 10},2 +${(i + 1) * 10},2 @@ /* Patch: ${p.summary} */`);
       lines.push(`- ${p.beforeHtml}`);
       lines.push(`+ ${codeFormat === 'jsx' ? p.afterJsx : p.afterHtml}`);
     });
@@ -114,12 +114,12 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'accessibility-fixes.patch';
+    a.download = 'accessibility-remediation.patch';
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  // Simplified 4 Primary Tabs
+  // Primary Navigation Tabs
   const primaryTabs: {
     id: StudioInspectorTab;
     label: string;
@@ -128,142 +128,142 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   }[] = [
     {
       id: 'issues',
-      label: 'Issues & Fixes',
-      icon: <Sparkles className="w-4 h-4" />,
+      label: 'Issues',
+      icon: <AlertCircle className="w-3.5 h-3.5" />,
       badge: unpatchedIssuesCount,
     },
     {
       id: 'focus-map',
-      label: 'Keyboard Flow',
-      icon: <Keyboard className="w-4 h-4" />,
+      label: 'Focus Order',
+      icon: <Keyboard className="w-3.5 h-3.5" />,
       badge: focusStops.length,
     },
     {
       id: 'contrast',
-      label: 'Contrast & Vision',
-      icon: <Palette className="w-4 h-4" />,
+      label: 'Contrast',
+      icon: <Palette className="w-3.5 h-3.5" />,
       badge: failingContrastCount,
     },
     {
       id: 'screen-reader',
       label: 'Screen Reader',
-      icon: <Volume2 className="w-4 h-4" />,
+      icon: <Volume2 className="w-3.5 h-3.5" />,
     },
   ];
 
   return (
     <aside
       style={{ width: width ? `${width}px` : undefined }}
-      className={`${width ? '' : 'w-[460px] xl:w-[500px]'} border-l border-slate-800 bg-[#0B0F17] flex flex-col h-full select-none shrink-0`}
+      className={`${width ? '' : 'w-[460px] xl:w-[500px]'} border-l border-zinc-800 bg-[#0E1017] flex flex-col h-full select-none shrink-0`}
     >
-      {/* Clean 4-Tab Header */}
-      <div className="grid grid-cols-4 border-b border-slate-800 bg-[#080C12] px-2 pt-2 gap-1.5">
-        {primaryTabs.map((tab) => {
-          const active =
-            activeTab === tab.id ||
-            (tab.id === 'issues' && activeTab === 'git-diff') ||
-            (tab.id === 'contrast' && activeTab === 'vision-lab');
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-t-xl text-xs font-semibold transition-all border-b-2 ${
-                active
-                  ? 'bg-[#111823] text-teal-300 border-teal-500'
-                  : 'text-slate-400 hover:text-slate-200 border-transparent hover:bg-white/[0.02]'
-              }`}
-            >
-              <div className="flex items-center gap-1.5">
+      {/* Modern Segmented Navigation Header */}
+      <div className="border-b border-zinc-800 bg-[#0B0D13] p-1.5">
+        <div className="grid grid-cols-4 gap-1 bg-zinc-900/60 p-1 rounded-lg border border-zinc-800/80">
+          {primaryTabs.map((tab) => {
+            const active =
+              activeTab === tab.id ||
+              (tab.id === 'issues' && activeTab === 'git-diff') ||
+              (tab.id === 'contrast' && activeTab === 'vision-lab');
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-1 rounded-md text-xs font-medium transition-all ${
+                  active
+                    ? 'bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
+                }`}
+              >
                 {tab.icon}
+                <span className="truncate">{tab.label}</span>
                 {tab.badge !== undefined && tab.badge > 0 && (
                   <span
-                    className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                    className={`text-[10px] font-mono px-1 py-0.2 rounded-full leading-none ${
                       active
-                        ? 'bg-teal-500/25 text-teal-200 border border-teal-500/40'
-                        : 'bg-slate-800 text-slate-300'
+                        ? 'bg-zinc-700 text-zinc-200 font-semibold'
+                        : 'bg-zinc-800 text-zinc-400'
                     }`}
                   >
                     {tab.badge}
                   </span>
                 )}
-              </div>
-              <span className="mt-1 truncate max-w-full">{tab.label}</span>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* CODE DIFF VIEW (When user clicks "View Code Changes") */}
+      {/* CODE DIFF VIEW */}
       {activeTab === 'git-diff' && (
         <div className="flex-1 flex flex-col overflow-hidden p-4">
           <div className="flex items-center justify-between mb-3">
             <button
               onClick={() => setActiveTab('issues')}
-              className="text-xs font-semibold text-teal-400 hover:text-teal-300 flex items-center gap-1"
+              className="text-xs font-medium text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Issues List</span>
+              <span>Back to Issues</span>
             </button>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => copyText(generateUnifiedGitDiff(), 'git-diff-all')}
-                className="px-3 py-1.5 rounded-lg bg-[#131B26] hover:bg-[#1B2636] border border-slate-700 text-xs text-slate-200 flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs text-zinc-200 flex items-center gap-1.5 transition-colors"
               >
                 {copiedId === 'git-diff-all' ? (
                   <>
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Copied!</span>
+                    <span>Copied</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy All Code</span>
+                    <Copy className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Copy Patch</span>
                   </>
                 )}
               </button>
 
               <button
                 onClick={downloadPatchFile}
-                className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-xs font-semibold text-zinc-950 flex items-center gap-1.5 transition-colors shadow-sm"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Download .patch</span>
+                <span>Export .patch</span>
               </button>
             </div>
           </div>
 
-          <p className="text-xs text-slate-400 mb-3">
-            Below are the exact HTML / React JSX lines changed when fixing the accessibility issues on the page:
+          <p className="text-xs text-zinc-400 mb-3">
+            Unified Git diff generated from accessibility remediations applied in the live DOM:
           </p>
 
-          <pre className="flex-1 rounded-xl bg-[#070A0F] border border-slate-800 p-3.5 font-mono text-xs text-slate-200 overflow-auto leading-relaxed">
+          <pre className="flex-1 rounded-lg bg-[#080A0F] border border-zinc-800 p-3 font-mono text-xs text-zinc-300 overflow-auto leading-relaxed">
             {generateUnifiedGitDiff()}
           </pre>
         </div>
       )}
 
-      {/* TAB 1: ISSUES & FIXES (Clean, Plain-English Cards + Tooltips) */}
+      {/* TAB 1: ISSUES */}
       {activeTab === 'issues' && (
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Simple Filter Row */}
-          <div className="p-3.5 border-b border-slate-800 bg-[#0E141E] flex items-center justify-between gap-2">
+          {/* Filter Bar */}
+          <div className="px-3.5 py-2.5 border-b border-zinc-800 bg-[#0B0D13] flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 flex-wrap">
               {(
                 [
-                  { id: 'all', label: 'All Issues' },
+                  { id: 'all', label: 'All' },
                   { id: 'focus-keyboard', label: 'Keyboard' },
                   { id: 'contrast-apca', label: 'Contrast' },
-                  { id: 'semantics-aria', label: 'Labels (ARIA)' },
+                  { id: 'semantics-aria', label: 'ARIA' },
                 ] as { id: IssueCategory | 'all'; label: string }[]
               ).map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setCategoryFilter(cat.id)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                     categoryFilter === cat.id
-                      ? 'bg-teal-600 text-white'
-                      : 'bg-[#151E2C] text-slate-400 hover:text-slate-200'
+                      ? 'bg-zinc-800 text-zinc-100 border border-zinc-700/80 shadow-sm'
+                      : 'bg-zinc-900/60 text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   {cat.label}
@@ -274,24 +274,24 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
             {appliedPatches.length > 0 && (
               <button
                 onClick={() => setActiveTab('git-diff')}
-                className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center gap-1 shrink-0 hover:bg-emerald-500/25"
+                className="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-medium flex items-center gap-1 shrink-0 hover:bg-zinc-700 transition-colors"
               >
                 <GitCompare className="w-3 h-3" />
-                <span>Diff ({appliedPatches.length})</span>
+                <span>Patch ({appliedPatches.length})</span>
               </button>
             )}
           </div>
 
           {/* Issues List */}
-          <div className="flex-1 overflow-y-auto p-3.5 space-y-3">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
             {filteredIssues.length === 0 ? (
               <div className="text-center py-12 px-4">
-                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-white">
-                  All Accessibility Checks Passed!
+                <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-zinc-200">
+                  No Violations Detected
                 </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  No remaining issues in this category.
+                <p className="text-xs text-zinc-500 mt-1">
+                  All automated checks in this category meet WCAG 2.1 standards.
                 </p>
               </div>
             ) : (
@@ -300,10 +300,10 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 const isCodeOpen = Boolean(expandedCodeIds[issue.id]);
                 const sevStyle =
                   issue.severity === 'critical'
-                    ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                    ? 'bg-red-500/10 text-red-400 border-red-500/25'
                     : issue.severity === 'serious'
-                    ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                    : 'bg-sky-500/15 text-sky-300 border-sky-500/30';
+                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/25'
+                    : 'bg-sky-500/10 text-sky-400 border-sky-500/25';
 
                 const targetSnippet =
                   codeFormat === 'jsx' ? issue.afterJsx : issue.afterHtml;
@@ -317,80 +317,81 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                       selectIssue(issue.id, issue.selector);
                       onSelectDomElement(issue.selector);
                     }}
-                    className={`rounded-xl border p-4 transition-all cursor-pointer ${
+                    className={`rounded-lg border p-3.5 transition-all cursor-pointer ${
                       issue.isPatched
-                        ? 'bg-emerald-950/15 border-emerald-500/30'
+                        ? 'bg-emerald-950/10 border-emerald-500/25'
                         : isSelected
-                        ? 'bg-[#141E2D] border-teal-500 shadow-lg'
-                        : 'bg-[#111823] border-slate-800 hover:border-slate-700'
+                        ? 'bg-[#161824] border-zinc-500 shadow-md ring-1 ring-zinc-500/30'
+                        : 'bg-[#12141D] border-zinc-800 hover:border-zinc-700'
                     }`}
                   >
-                    {/* Top Badges with Tooltips for Abbreviations */}
+                    {/* Header: Severity & Standard */}
                     <div className="flex items-center justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span
-                          className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border ${sevStyle}`}
+                          className={`text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded border ${sevStyle}`}
                         >
                           {issue.severity}
                         </span>
 
-                        <GlossaryBadge
-                          termKey="WCAG"
-                          displayText={issue.wcagCriteria}
-                          className="text-[11px] font-mono text-slate-300 bg-[#090D14] px-2 py-0.5 rounded border border-slate-800"
-                          align="left"
-                        />
+                        <span className="text-[11px] font-mono text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
+                          {issue.wcagCriteria}
+                        </span>
+
+                        <span className="text-[11px] font-mono text-zinc-500 truncate max-w-[140px]">
+                          {issue.selector}
+                        </span>
                       </div>
 
                       {issue.isPatched && (
-                        <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
-                          <Check className="w-3 h-3" /> Fixed on Page
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                          <Check className="w-3 h-3" /> Patched
                         </span>
                       )}
                     </div>
 
-                    {/* Plain-English Problem Title & Impact */}
-                    <h3 className="text-sm font-bold text-white leading-snug">
+                    {/* Title & Impact */}
+                    <h3 className="text-xs font-semibold text-zinc-100 leading-snug">
                       {issue.title}
                     </h3>
-                    <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+                    <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
                       {issue.impactSummary}
                     </p>
 
-                    {/* How to Fix Explanation */}
-                    <div className="mt-3 p-3 rounded-lg bg-teal-950/30 border border-teal-500/25 text-xs text-teal-100 leading-relaxed">
-                      <strong className="text-teal-300">How we fix this: </strong>
+                    {/* Remediation Note */}
+                    <div className="mt-2.5 p-2.5 rounded-md bg-zinc-900/80 border border-zinc-800 text-xs text-zinc-300 leading-relaxed">
+                      <span className="text-zinc-200 font-semibold">Remediation: </span>
                       {issue.aiExplanation}
                     </div>
 
-                    {/* Action Row: 1-Click Fix + Collapsible Code Toggle */}
+                    {/* Action Row */}
                     <div
-                      className="mt-3.5 flex items-center justify-between gap-2"
+                      className="mt-3 flex items-center justify-between gap-2"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {!issue.isPatched ? (
                         <button
                           onClick={() => onApplySingleFix(issue)}
-                          className="flex-1 py-2 px-3.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+                          className="flex-1 py-1.5 px-3 rounded-md bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
                         >
-                          <Wand2 className="w-3.5 h-3.5" />
-                          <span>Fix This Issue on Page</span>
+                          <Wrench className="w-3.5 h-3.5" />
+                          <span>Apply Fix</span>
                         </button>
                       ) : (
                         <button
                           onClick={() => onRevertSingleFix(issue.id)}
-                          className="flex-1 py-2 px-3.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                          className="flex-1 py-1.5 px-3 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
-                          <span>Undo Fix</span>
+                          <span>Revert Patch</span>
                         </button>
                       )}
 
                       <button
                         onClick={() => toggleCodeExpand(issue.id)}
-                        className="py-2 px-3 rounded-lg bg-[#182232] hover:bg-[#1F2C40] border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1 transition-colors"
+                        className="py-1.5 px-2.5 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs font-medium flex items-center gap-1 transition-colors"
                       >
-                        <span>{isCodeOpen ? 'Hide Code' : 'View Code'}</span>
+                        <span>{isCodeOpen ? 'Hide' : 'Code'}</span>
                         {isCodeOpen ? (
                           <ChevronUp className="w-3.5 h-3.5" />
                         ) : (
@@ -399,30 +400,30 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                       </button>
                     </div>
 
-                    {/* Collapsible Code Snippet (Keeps Cards Clean Until Clicked!) */}
+                    {/* Collapsible Diff */}
                     {isCodeOpen && (
                       <div
-                        className="mt-3 pt-3 border-t border-slate-800 space-y-2"
+                        className="mt-3 pt-3 border-t border-zinc-800 space-y-2"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1 bg-[#090D14] p-0.5 rounded border border-slate-800 text-[11px]">
+                          <div className="flex items-center gap-1 bg-zinc-900 p-0.5 rounded border border-zinc-800 text-[11px]">
                             <button
                               onClick={() => setCodeFormat('jsx')}
-                              className={`px-2 py-0.5 rounded ${
+                              className={`px-2 py-0.5 rounded text-[11px] font-medium ${
                                 codeFormat === 'jsx'
-                                  ? 'bg-teal-600 text-white'
-                                  : 'text-slate-400'
+                                  ? 'bg-zinc-800 text-zinc-100'
+                                  : 'text-zinc-400'
                               }`}
                             >
-                              React JSX
+                              JSX
                             </button>
                             <button
                               onClick={() => setCodeFormat('html')}
-                              className={`px-2 py-0.5 rounded ${
+                              className={`px-2 py-0.5 rounded text-[11px] font-medium ${
                                 codeFormat === 'html'
-                                  ? 'bg-teal-600 text-white'
-                                  : 'text-slate-400'
+                                  ? 'bg-zinc-800 text-zinc-100'
+                                  : 'text-zinc-400'
                               }`}
                             >
                               HTML
@@ -431,24 +432,24 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 
                           <button
                             onClick={() => copyText(targetSnippet, issue.id)}
-                            className="text-xs text-teal-300 hover:text-teal-200 flex items-center gap-1"
+                            className="text-xs text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
                           >
                             {copiedId === issue.id ? (
                               <>
                                 <Check className="w-3.5 h-3.5 text-emerald-400" />
-                                <span>Copied!</span>
+                                <span>Copied</span>
                               </>
                             ) : (
                               <>
                                 <Copy className="w-3.5 h-3.5" />
-                                <span>Copy Fixed Code</span>
+                                <span>Copy Code</span>
                               </>
                             )}
                           </button>
                         </div>
 
-                        <div className="rounded-lg bg-[#080B11] border border-slate-800 p-2.5 font-mono text-[11px] overflow-x-auto space-y-1.5">
-                          <div className="text-rose-400/90 line-through">
+                        <div className="rounded-md bg-[#080A0F] border border-zinc-800 p-2 font-mono text-[11px] overflow-x-auto space-y-1">
+                          <div className="text-red-400/90 line-through">
                             - {issue.beforeHtml}
                           </div>
                           <div className="text-emerald-400">+ {targetSnippet}</div>
@@ -463,28 +464,27 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
         </div>
       )}
 
-      {/* TAB 2: KEYBOARD FLOW (Simple Step-by-Step Tab Order List) */}
+      {/* TAB 2: FOCUS ORDER */}
       {activeTab === 'focus-map' && (
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-slate-800 bg-[#0E141E]">
+          <div className="p-3.5 border-b border-zinc-800 bg-[#0B0D13]">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-white">
-                Keyboard Tab Order ({focusStops.length} Stops)
+              <h2 className="text-xs font-semibold text-zinc-200">
+                Sequential Tab Order ({focusStops.length} Elements)
               </h2>
               <GlossaryBadge
                 termKey="tabindex"
-                displayText="What is tabindex?"
-                className="text-xs text-teal-300"
+                displayText="tabindex spec"
+                className="text-xs text-zinc-400 hover:text-zinc-200 font-mono"
                 align="right"
               />
             </div>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              This list shows the exact order a user moves through the page when pressing the{' '}
-              <strong>Tab</strong> key. Click any step to test it on the page.
+            <p className="text-xs text-zinc-400 mt-1">
+              Keyboard traversal path evaluated in DOM order. Click any step to inspect.
             </p>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3.5 space-y-2.5">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {focusStops.map((stop) => {
               const isCurrent = activeFocusStepIndex === stop.index;
               const hasBug =
@@ -499,21 +499,21 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                   onClick={() => onFocusStopSelect(stop.index)}
                   onMouseEnter={() => setHoveredSelector(stop.selector)}
                   onMouseLeave={() => setHoveredSelector(null)}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
+                  className={`p-3 rounded-lg border cursor-pointer transition-all flex items-start gap-3 ${
                     isCurrent
-                      ? 'bg-teal-950/40 border-teal-500 shadow-md'
+                      ? 'bg-[#161824] border-zinc-500 shadow-md ring-1 ring-zinc-500/30'
                       : hasBug
-                      ? 'bg-rose-950/15 border-rose-500/35 hover:border-rose-500/60'
-                      : 'bg-[#111823] border-slate-800 hover:border-slate-700'
+                      ? 'bg-red-950/10 border-red-500/30 hover:border-red-500/50'
+                      : 'bg-[#12141D] border-zinc-800 hover:border-zinc-700'
                   }`}
                 >
                   <div
-                    className={`w-7 h-7 rounded-full text-xs font-mono font-bold flex items-center justify-center shrink-0 mt-0.5 ${
+                    className={`w-6 h-6 rounded-md text-xs font-mono font-bold flex items-center justify-center shrink-0 mt-0.5 ${
                       isCurrent
-                        ? 'bg-teal-600 text-white'
+                        ? 'bg-white text-zinc-950'
                         : hasBug
-                        ? 'bg-rose-600 text-white'
-                        : 'bg-sky-600 text-white'
+                        ? 'bg-red-600/80 text-white'
+                        : 'bg-zinc-800 text-zinc-300'
                     }`}
                   >
                     {stop.index}
@@ -521,36 +521,33 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-bold text-white truncate">
+                      <span className="text-xs font-medium text-zinc-200 truncate">
                         {stop.accessibleName}
                       </span>
-                      <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#080B11] text-slate-300 border border-slate-800 shrink-0">
+                      <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 shrink-0">
                         &lt;{stop.tagName}&gt;
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                       {stop.isPositiveTabIndexAnomaly && (
-                        <GlossaryBadge
-                          termKey="tabindex"
-                          displayText={`Out-of-order tabindex="${stop.rawTabIndex}"`}
-                          className="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                          align="left"
-                        />
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">
+                          Out-of-order tabindex=&quot;{stop.rawTabIndex}&quot;
+                        </span>
                       )}
                       {stop.isVisualOrderMismatch && (
-                        <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                          Jumps backwards on screen ↑
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                          Visual jump upwards
                         </span>
                       )}
                       {!stop.hasFocusRing && (
-                        <span className="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                          Missing focus outline ring
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">
+                          No focus ring
                         </span>
                       )}
                       {!hasBug && (
                         <span className="text-[11px] text-emerald-400">
-                          ✓ Normal focus order
+                          Compliant focus flow
                         </span>
                       )}
                     </div>
@@ -562,85 +559,62 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
         </div>
       )}
 
-      {/* TAB 3: CONTRAST & VISION SIMULATOR (Combined for Simplicity!) */}
+      {/* TAB 3: CONTRAST & VISION */}
       {activeTab === 'contrast' || activeTab === 'vision-lab' ? (
-        <div className="flex-1 overflow-y-auto p-4 space-y-5">
-          {/* Section A: Vision Deficiency Simulator */}
-          <div className="p-4 rounded-xl bg-[#111823] border border-slate-800 space-y-3">
+        <div className="flex-1 overflow-y-auto p-3 space-y-4">
+          {/* Vision Simulation */}
+          <div className="p-3.5 rounded-lg bg-[#12141D] border border-zinc-800 space-y-2.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-teal-400" />
-                <h2 className="text-xs font-bold uppercase tracking-wider text-white">
-                  1. Color Blindness &amp; Vision Simulator
+                <Eye className="w-3.5 h-3.5 text-zinc-400" />
+                <h2 className="text-xs font-semibold text-zinc-200">
+                  Vision Simulation
                 </h2>
               </div>
               {visionMode !== 'normal' && visionMode !== 'glaucoma' && (
                 <button
                   onClick={() => setSplitVisionCurtain(!splitVisionCurtain)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${
+                  className={`px-2 py-0.5 rounded text-[11px] font-medium border ${
                     splitVisionCurtain
-                      ? 'bg-teal-600 text-white border-teal-500'
-                      : 'bg-[#090D14] text-slate-300 border-slate-700'
+                      ? 'bg-white text-zinc-950 border-white font-medium'
+                      : 'bg-zinc-900 text-zinc-400 border-zinc-700'
                   }`}
                 >
-                  {splitVisionCurtain ? '50/50 Split: ON' : 'Compare 50/50'}
+                  {splitVisionCurtain ? 'Split Active' : '50/50 Split'}
                 </button>
               )}
             </div>
 
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Click any condition below to see how users with color blindness or eye conditions experience the page:
-            </p>
-
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               {VISION_MODES.map((m) => {
                 const active = visionMode === m.id;
                 return (
                   <button
                     key={m.id}
                     onClick={() => setVisionMode(m.id)}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                    className={`p-2 rounded-md border text-left transition-all ${
                       active
-                        ? 'bg-teal-950/50 border-teal-500 text-white shadow-sm'
-                        : 'bg-[#0B0F17] border-slate-800 text-slate-300 hover:border-slate-700'
+                        ? 'bg-zinc-800 border-zinc-600 text-white shadow-sm'
+                        : 'bg-zinc-900/60 border-zinc-800/80 text-zinc-400 hover:border-zinc-700'
                     }`}
                   >
-                    <div className="text-xs font-bold truncate">{m.shortLabel}</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">
-                      {m.prevalence}
-                    </div>
+                    <div className="text-xs font-medium truncate">{m.shortLabel}</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">{m.prevalence}</div>
                   </button>
                 );
               })}
             </div>
-
-            {visionMode !== 'normal' && (
-              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 leading-relaxed">
-                <strong>What to look for:</strong>{' '}
-                {VISION_MODES.find((m) => m.id === visionMode)?.uxImpact}
-              </div>
-            )}
           </div>
 
-          {/* Section B: Text Contrast Checker */}
-          <div className="space-y-3">
+          {/* Contrast Audits */}
+          <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-white">
-                2. Text Contrast Checker ({contrastReports.length} Elements)
+              <h2 className="text-xs font-semibold text-zinc-200">
+                Color Contrast ({contrastReports.length} Elements)
               </h2>
               <div className="flex items-center gap-2 text-xs">
-                <GlossaryBadge
-                  termKey="AA"
-                  displayText="What is AA?"
-                  className="text-teal-300"
-                  align="right"
-                />
-                <GlossaryBadge
-                  termKey="APCA"
-                  displayText="What is APCA Lc?"
-                  className="text-teal-300"
-                  align="right"
-                />
+                <GlossaryBadge termKey="AA" displayText="WCAG AA" className="text-zinc-400 hover:text-zinc-200" align="right" />
+                <GlossaryBadge termKey="APCA" displayText="APCA Lc" className="text-zinc-400 hover:text-zinc-200" align="right" />
               </div>
             </div>
 
@@ -654,274 +628,141 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                   onMouseEnter={() => setHoveredSelector(c.selector)}
                   onMouseLeave={() => setHoveredSelector(null)}
                   onClick={() => onSelectDomElement(c.selector)}
-                  className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                  className={`p-3 rounded-lg border transition-all cursor-pointer ${
                     passBoth
-                      ? 'bg-[#111823] border-slate-800'
-                      : 'bg-rose-950/15 border-rose-500/40'
+                      ? 'bg-[#12141D] border-zinc-800'
+                      : 'bg-red-950/10 border-red-500/30'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-bold text-white truncate">
-                      “{c.textPreview}”
+                    <span className="text-xs font-medium text-zinc-200 truncate">
+                      &ldquo;{c.textPreview}&rdquo;
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <GlossaryBadge
-                        termKey="AA"
-                        displayText={`${effectiveRatio}:1 ${
-                          c.passesAAA ? 'AAA' : c.passesAA ? 'Pass AA' : 'Low Contrast'
-                        }`}
-                        className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                      <span
+                        className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded ${
                           c.passesAA
-                            ? 'bg-emerald-500/20 text-emerald-300'
-                            : 'bg-rose-500/20 text-rose-300'
+                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
+                            : 'bg-red-500/15 text-red-400 border border-red-500/25'
                         }`}
-                        align="right"
-                      />
-                      <GlossaryBadge
-                        termKey="Lc"
-                        displayText={`Lc ${Math.round(Math.abs(c.apcaLc))}`}
-                        className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                      >
+                        {effectiveRatio}:1 {c.passesAAA ? 'AAA' : c.passesAA ? 'AA' : 'Fail'}
+                      </span>
+                      <span
+                        className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded ${
                           c.passesApca
-                            ? 'bg-teal-500/20 text-teal-300'
-                            : 'bg-amber-500/20 text-amber-300'
+                            ? 'bg-sky-500/15 text-sky-400 border border-sky-500/25'
+                            : 'bg-amber-500/15 text-amber-400 border border-amber-500/25'
                         }`}
-                        align="right"
-                      />
+                      >
+                        Lc {Math.round(Math.abs(c.apcaLc))}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Color Swatches */}
-                  <div className="flex items-center justify-between text-xs text-slate-400 mt-2">
+                  {/* Swatches */}
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
                     <div className="flex items-center gap-2 font-mono text-[11px]">
                       <span className="flex items-center gap-1.5">
                         <span
-                          className="w-3.5 h-3.5 rounded border border-white/20 inline-block"
+                          className="w-3 h-3 rounded-sm border border-white/20 inline-block"
                           style={{ backgroundColor: c.fgHex }}
                         />
-                        Text {c.fgHex}
+                        {c.fgHex}
                       </span>
-                      <span>on</span>
+                      <span className="text-zinc-600">on</span>
                       <span className="flex items-center gap-1.5">
                         <span
-                          className="w-3.5 h-3.5 rounded border border-white/20 inline-block"
+                          className="w-3 h-3 rounded-sm border border-white/20 inline-block"
                           style={{
                             backgroundColor: c.worstGradientBgHex || c.bgHex,
                           }}
                         />
-                        Bg {c.worstGradientBgHex || c.bgHex}
+                        {c.worstGradientBgHex || c.bgHex}
                       </span>
                     </div>
-                    <span className="text-[11px]">{c.fontSizePx}px font</span>
+                    <span className="text-[11px] text-zinc-500">{c.fontSizePx}px font</span>
                   </div>
-
-                  {c.isDynamicGradientOrImage && (
-                    <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200">
-                      ⚡ Background Gradient Warning: Contrast drops to{' '}
-                      <strong>{effectiveRatio}:1</strong> over the lightest part of the gradient.
-                    </div>
-                  )}
 
                   {!passBoth && (
                     <div
-                      className="mt-3 pt-2.5 border-t border-slate-800/80 flex flex-col gap-2.5"
+                      className="mt-3 pt-2.5 border-t border-zinc-800 space-y-2"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {/* 1. Clear Accessibility Issue Diagnosis */}
-                      <div className="px-2.5 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/25 text-[11px] text-rose-200 leading-relaxed">
-                        <div className="font-semibold text-rose-300 flex items-center gap-1.5 mb-0.5">
-                          <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                          <span>Why this fails:</span>
-                        </div>
-                        <p className="text-slate-300">
-                          {c.explanation ||
-                            `Text (${c.fgHex}) on background (${c.worstGradientBgHex || c.bgHex}) achieves only ${effectiveRatio}:1 contrast (WCAG AA requires ≥ ${c.isLargeText ? '3.0' : '4.5'}:1).`}
-                        </p>
+                      <div className="px-2.5 py-1.5 rounded bg-red-500/10 border border-red-500/20 text-[11px] text-red-300">
+                        {c.explanation ||
+                          `Contrast ratio ${effectiveRatio}:1 fails WCAG AA minimum (${c.isLargeText ? '3.0' : '4.5'}:1).`}
                       </div>
 
-                      {/* 2. Current Code vs. Suggested Code Fix Box */}
-                      <div className="rounded-xl bg-[#080B11] border border-slate-800 p-2.5 space-y-2">
+                      {/* Code Snippet */}
+                      <div className="rounded-md bg-[#080A0F] border border-zinc-800 p-2 space-y-1.5">
                         <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1.5 text-slate-300 font-semibold text-[11px]">
-                            <Code2 className="w-3.5 h-3.5 text-teal-400" />
-                            <span>Code Suggestion</span>
-                          </div>
-
-                          <div className="flex items-center gap-1.5">
-                            {/* Format Switcher: CSS vs JSX */}
-                            <div className="flex items-center bg-slate-900 border border-slate-700/80 rounded-md p-0.5 text-[10px]">
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setContrastCodeView((prev) => ({ ...prev, [c.id]: 'css' }));
-                                }}
-                                className={`px-1.5 py-0.5 rounded font-mono transition-colors ${
-                                  (contrastCodeView[c.id] || 'css') === 'css'
-                                    ? 'bg-teal-600 text-white font-bold'
-                                    : 'text-slate-400 hover:text-slate-200'
-                                }`}
-                              >
-                                CSS
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setContrastCodeView((prev) => ({ ...prev, [c.id]: 'html' }));
-                                }}
-                                className={`px-1.5 py-0.5 rounded font-mono transition-colors ${
-                                  contrastCodeView[c.id] === 'html'
-                                    ? 'bg-teal-600 text-white font-bold'
-                                    : 'text-slate-400 hover:text-slate-200'
-                                }`}
-                              >
-                                JSX
-                              </button>
-                            </div>
-
-                            {/* Copy Code Button */}
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const isHtml = contrastCodeView[c.id] === 'html';
-                                const textToCopy = isHtml
-                                  ? c.afterHtmlBg || c.afterHtmlFg || `<${c.tagName} style="color: ${c.fgHex}; background-color: ${c.suggestedBgHex};">`
-                                  : (c.cssSuggestedBg || c.cssSuggestedFg || `color: ${c.fgHex};\nbackground-color: ${c.suggestedBgHex};`);
-                                copyText(textToCopy, `code-${c.id}`);
-                              }}
-                              className="text-[11px] text-teal-300 hover:text-teal-200 flex items-center gap-1 bg-slate-800/90 hover:bg-slate-700 px-2 py-0.5 rounded border border-slate-700 transition-colors"
-                            >
-                              {copiedId === `code-${c.id}` ? (
-                                <>
-                                  <Check className="w-3 h-3 text-emerald-400" />
-                                  <span className="text-emerald-300">Copied!</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3 h-3" />
-                                  <span>Copy Code</span>
-                                </>
-                              )}
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Code Body */}
-                        {(contrastCodeView[c.id] || 'css') === 'css' ? (
-                          <div className="font-mono text-[11px] p-2 rounded-lg bg-[#05080E] border border-slate-800/80 space-y-1.5 text-slate-300 overflow-x-auto">
-                            <div>
-                              <div className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-0.5">
-                                Current Code ({effectiveRatio}:1 Fails):
-                              </div>
-                              <div className="text-rose-400/90 pl-2 border-l-2 border-rose-500/50 whitespace-pre">
-                                {c.cssCurrent || `color: ${c.fgHex};\nbackground-color: ${c.bgHex};`}
-                              </div>
-                            </div>
-
-                            <div className="pt-1.5 border-t border-slate-800/80 space-y-1.5">
-                              <div className="text-slate-500 text-[10px] uppercase font-bold tracking-wider">
-                                Suggested Fix Options:
-                              </div>
-                              {c.suggestedBgHex !== (c.worstGradientBgHex || c.bgHex) && (
-                                <div className="text-emerald-400 pl-2 border-l-2 border-emerald-500/60 whitespace-pre">
-                                  <span className="text-[10px] text-teal-300/80 font-sans font-medium block">
-                                    Option A (Fix background to accessible shade):
-                                  </span>
-                                  {c.cssSuggestedBg || `color: ${c.fgHex};\nbackground-color: ${c.suggestedBgHex};`}
-                                </div>
-                              )}
-                              {c.suggestedFgHex !== c.fgHex && (
-                                <div className="text-emerald-400 pl-2 border-l-2 border-emerald-500/60 whitespace-pre">
-                                  <span className="text-[10px] text-teal-300/80 font-sans font-medium block">
-                                    Option B (Fix text to accessible contrast):
-                                  </span>
-                                  {c.cssSuggestedFg || `color: ${c.suggestedFgHex};\nbackground-color: ${c.worstGradientBgHex || c.bgHex};`}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="font-mono text-[11px] p-2 rounded-lg bg-[#05080E] border border-slate-800/80 space-y-1.5 text-slate-300 overflow-x-auto">
-                            <div>
-                              <div className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-0.5">
-                                Current Element:
-                              </div>
-                              <div className="text-rose-400/90 line-through pl-2 border-l-2 border-rose-500/50">
-                                - {c.beforeHtml || `<${c.tagName} style="color: ${c.fgHex}; background-color: ${c.bgHex}">`}
-                              </div>
-                            </div>
-
-                            <div className="pt-1.5 border-t border-slate-800/80">
-                              <div className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-0.5">
-                                Suggested Element:
-                              </div>
-                              <div className="text-emerald-400 pl-2 border-l-2 border-emerald-500/60">
-                                + {c.afterHtmlBg || c.afterHtmlFg || `<${c.tagName} style="color: ${c.fgHex}; background-color: ${c.suggestedBgHex}">`}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* 3. Live Hot-Patch Buttons */}
-                      <div className="flex flex-col gap-1.5 pt-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-400 font-medium text-[11px]">Apply Fix Live in Sandbox:</span>
-                          <span className="text-[10px] text-teal-400/90 font-mono">
-                            Target ≥ {c.isLargeText ? '3.0:1' : '4.5:1'} AA
+                          <span className="text-zinc-400 text-[10px] font-medium uppercase">
+                            Suggested Fix
                           </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const snippet = `color: ${c.fgHex};\nbackground-color: ${c.suggestedBgHex};`;
+                              copyText(snippet, `code-${c.id}`);
+                            }}
+                            className="text-[11px] text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
+                          >
+                            {copiedId === `code-${c.id}` ? (
+                              <>
+                                <Check className="w-3 h-3 text-emerald-400" />
+                                <span>Copied</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" />
+                                <span>Copy CSS</span>
+                              </>
+                            )}
+                          </button>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-2">
-                          {/* Option 1: Fix Text Color */}
-                          {c.suggestedFgHex !== c.fgHex && (
-                            <button
-                              onClick={() =>
-                                onApplyCustomContrast(c.selector, c.suggestedFgHex, undefined)
-                              }
-                              className="flex-1 min-w-[130px] px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-700 hover:border-slate-600 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-sm"
-                              title={`Change text color to accessible ${c.suggestedFgHex}`}
-                            >
-                              <span
-                                className="w-3.5 h-3.5 rounded border border-white/20 shrink-0 inline-block"
-                                style={{ backgroundColor: c.suggestedFgHex }}
-                              />
-                              <span>Fix Text ({c.suggestedFgHex})</span>
-                            </button>
-                          )}
-
-                          {/* Option 2: Fix Background Color */}
+                        <div className="font-mono text-[11px] text-zinc-400 pl-2 border-l-2 border-emerald-500/60">
                           {c.suggestedBgHex !== (c.worstGradientBgHex || c.bgHex) && (
-                            <button
-                              onClick={() =>
-                                onApplyCustomContrast(c.selector, c.fgHex, c.suggestedBgHex)
-                              }
-                              className="flex-1 min-w-[130px] px-2.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 active:scale-[0.98] text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-sm"
-                              title={`Adjust background to accessible ${c.suggestedBgHex} (keeps ${c.fgHex} text)`}
-                            >
-                              <Wand2 className="w-3.5 h-3.5 shrink-0" />
-                              <span
-                                className="w-3.5 h-3.5 rounded border border-white/20 shrink-0 inline-block"
-                                style={{ backgroundColor: c.suggestedBgHex }}
-                              />
-                              <span>Fix Background ({c.suggestedBgHex})</span>
-                            </button>
+                            <div>background-color: {c.suggestedBgHex};</div>
                           )}
-
-                          {/* Fallback if neither differed */}
-                          {c.suggestedFgHex === c.fgHex && c.suggestedBgHex === (c.worstGradientBgHex || c.bgHex) && (
-                            <button
-                              onClick={() =>
-                                onApplyCustomContrast(c.selector, '#0F172A', undefined)
-                              }
-                              className="w-full px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5"
-                            >
-                              <Wand2 className="w-3 h-3" />
-                              <span>Fix Color Live (#0F172A)</span>
-                            </button>
+                          {c.suggestedFgHex !== c.fgHex && (
+                            <div>color: {c.suggestedFgHex};</div>
                           )}
                         </div>
+                      </div>
+
+                      {/* Live Hot-Patch */}
+                      <div className="flex items-center gap-2 pt-1">
+                        {c.suggestedBgHex !== (c.worstGradientBgHex || c.bgHex) && (
+                          <button
+                            onClick={() =>
+                              onApplyCustomContrast(c.selector, c.fgHex, c.suggestedBgHex)
+                            }
+                            className="flex-1 py-1.5 px-2.5 rounded bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+                          >
+                            <span
+                              className="w-3 h-3 rounded-sm border border-white/20 inline-block"
+                              style={{ backgroundColor: c.suggestedBgHex }}
+                            />
+                            <span>Patch Background ({c.suggestedBgHex})</span>
+                          </button>
+                        )}
+                        {c.suggestedFgHex !== c.fgHex && (
+                          <button
+                            onClick={() =>
+                              onApplyCustomContrast(c.selector, c.suggestedFgHex, undefined)
+                            }
+                            className="flex-1 py-1.5 px-2.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold flex items-center justify-center gap-1.5 border border-zinc-700 transition-colors"
+                          >
+                            <span
+                              className="w-3 h-3 rounded-sm border border-white/20 inline-block"
+                              style={{ backgroundColor: c.suggestedFgHex }}
+                            />
+                            <span>Patch Text ({c.suggestedFgHex})</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
@@ -932,63 +773,51 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
         </div>
       ) : null}
 
-      {/* TAB 4: SCREEN READER PREVIEW */}
+      {/* TAB 4: SCREEN READER */}
       {activeTab === 'screen-reader' && (
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-slate-800 bg-[#0E141E] flex items-center justify-between">
+          <div className="p-3.5 border-b border-zinc-800 bg-[#0B0D13] flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-white">
-                  Screen Reader Simulator
-                </h2>
-                <GlossaryBadge
-                  termKey="ARIA"
-                  displayText="What is ARIA?"
-                  className="text-xs text-teal-300"
-                  align="right"
-                />
-              </div>
-              <p className="text-xs text-slate-400 mt-1">
-                See what blind users hear when navigating your page with macOS VoiceOver or Windows NVDA.
+              <h2 className="text-xs font-semibold text-zinc-200">
+                Screen Reader Speech Log
+              </h2>
+              <p className="text-xs text-zinc-500 mt-0.5">
+                Synthetic speech announcements triggered on focus and interaction.
               </p>
             </div>
             {announcements.length > 0 && (
               <button
                 onClick={clearAnnouncements}
-                className="text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-[#151E2C]"
+                className="text-xs text-zinc-400 hover:text-zinc-200 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 transition-colors"
               >
                 Clear
               </button>
             )}
           </div>
 
-          {/* Top Half: Spoken Log */}
-          <div className="h-44 border-b border-slate-800 overflow-y-auto p-3.5 space-y-2 bg-[#080B11]">
-            <div className="text-[11px] font-semibold text-teal-400">
-              Spoken Output Log (Click any element on the page to test):
-            </div>
+          {/* Spoken Log */}
+          <div className="h-44 border-b border-zinc-800 overflow-y-auto p-3 space-y-2 bg-[#080A0F]">
             {announcements.length === 0 ? (
-              <p className="text-xs text-slate-500 py-5 text-center">
-                Click any element on the webpage or press <strong>Next (Tab)</strong> at the bottom to see what a screen reader speaks.
+              <p className="text-xs text-zinc-500 py-6 text-center font-mono">
+                Awaiting keyboard focus or click events...
               </p>
             ) : (
               announcements.map((ann) => (
                 <div
                   key={ann.id}
-                  className="p-2.5 rounded-xl bg-[#111823] border border-slate-800 text-xs space-y-1"
+                  className="p-2 rounded bg-zinc-900 border border-zinc-800 text-xs space-y-1"
                 >
-                  <div className="flex items-center justify-between text-slate-200">
-                    <span>
-                      <strong className="text-teal-300">Spoken:</strong> “
-                      {ann.voiceOverOutput}”
+                  <div className="flex items-center justify-between text-zinc-300">
+                    <span className="font-mono text-[11px] text-zinc-100">
+                      &ldquo;{ann.voiceOverOutput}&rdquo;
                     </span>
-                    <span className="text-[10px] font-mono text-slate-500">
+                    <span className="text-[10px] font-mono text-zinc-500">
                       {ann.timestamp}
                     </span>
                   </div>
                   {ann.warning && (
-                    <div className="text-[11px] text-rose-300 flex items-center gap-1.5 pt-1">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <div className="text-[11px] text-red-400 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3 shrink-0" />
                       <span>{ann.warning}</span>
                     </div>
                   )}
@@ -997,16 +826,10 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
             )}
           </div>
 
-          {/* Bottom Half: Page Elements List */}
-          <div className="flex-1 overflow-y-auto p-3.5 space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-              <span>Page Elements Read by Screen Readers ({a11yTree.length})</span>
-              <GlossaryBadge
-                termKey="aria-live"
-                displayText="What is aria-live?"
-                className="text-teal-300"
-                align="right"
-              />
+          {/* Accessibility Tree Elements */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
+            <div className="text-xs text-zinc-500 mb-1">
+              Accessible DOM Elements ({a11yTree.length})
             </div>
 
             {a11yTree.map((node) => (
@@ -1015,23 +838,21 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 onClick={() => onSelectDomElement(node.selector)}
                 onMouseEnter={() => setHoveredSelector(node.selector)}
                 onMouseLeave={() => setHoveredSelector(null)}
-                className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-colors flex items-center justify-between gap-2 ${
+                className={`p-2 rounded border text-xs cursor-pointer transition-colors flex items-center justify-between gap-2 ${
                   node.hasMissingName
-                    ? 'bg-rose-950/20 border-rose-500/40 text-rose-200'
-                    : 'bg-[#111823] border-slate-800 hover:border-slate-700 text-slate-200'
+                    ? 'bg-red-950/10 border-red-500/30 text-red-300'
+                    : 'bg-[#12141D] border-zinc-800 hover:border-zinc-700 text-zinc-300'
                 }`}
               >
                 <div className="truncate flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-md bg-teal-500/15 text-teal-300 text-[11px] font-mono font-semibold">
+                  <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400 text-[10px] font-mono">
                     {node.role}
                   </span>
                   <span className="truncate font-medium">
-                    {node.accessibleName
-                      ? `“${node.accessibleName}”`
-                      : '⚠️ Missing Label (Announced as blank!)'}
+                    {node.accessibleName ? `“${node.accessibleName}”` : 'Unnamed Element'}
                   </span>
                 </div>
-                <span className="text-[11px] font-mono text-slate-500 shrink-0">
+                <span className="text-[10px] font-mono text-zinc-500 shrink-0">
                   &lt;{node.tagName}&gt;
                 </span>
               </div>

@@ -171,7 +171,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
       ) : (
         <span className="inline-flex items-center gap-1 underline decoration-dotted decoration-slate-500 underline-offset-2">
           {label && <span>{label}</span>}
-          <HelpCircle className="w-3.5 h-3.5 text-slate-400 hover:text-teal-400 transition-colors shrink-0" />
+          <HelpCircle className="w-3.5 h-3.5 text-zinc-500 hover:text-zinc-200 transition-colors shrink-0" />
         </span>
       )}
 
@@ -190,17 +190,17 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
               width: '280px',
               zIndex: 999999,
             }}
-            className="p-3.5 rounded-xl bg-[#0B1017] border border-teal-500/60 shadow-[0_16px_40px_rgba(0,0,0,0.95)] text-left pointer-events-none"
+            className="p-3 rounded-lg bg-[#141620] border border-zinc-700 shadow-2xl text-left pointer-events-none"
           >
-            <div className="text-xs font-bold text-teal-300 mb-1 flex items-center gap-1.5">
+            <div className="text-xs font-semibold text-zinc-100 mb-1 flex items-center gap-1.5">
               <span>{title}</span>
             </div>
-            <p className="text-[11px] text-slate-200 leading-relaxed font-normal">
+            <p className="text-[11px] text-zinc-300 leading-relaxed font-normal">
               {description}
             </p>
             {extraNote && (
-              <p className="text-[10px] text-teal-200/90 mt-2 pt-1.5 border-t border-slate-800 leading-relaxed font-normal">
-                💡 {extraNote}
+              <p className="text-[10px] text-zinc-400 mt-2 pt-1.5 border-t border-zinc-800 leading-relaxed font-normal">
+                {extraNote}
               </p>
             )}
           </div>,

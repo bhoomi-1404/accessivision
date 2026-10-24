@@ -3,12 +3,94 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AccessiVision — Real-Time Web Accessibility &amp; UX Diagnostic Studio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Primary Title & Brand -->
+    <title>AccessiVision — Web Accessibility (a11y) &amp; UX Diagnostic Studio</title>
+    <meta name="title" content="AccessiVision — Web Accessibility (a11y) &amp; UX Diagnostic Studio" />
+    <meta
+      name="description"
+      content="Free in-browser web accessibility (a11y) diagnostic suite. Visualize keyboard tab order, simulate 7 vision deficiencies, audit APCA contrast, and auto-generate WCAG 2.1 code fixes in real time. 100% client-side privacy."
+    />
+    <meta
+      name="keywords"
+      content="accessibility checker, a11y testing tool, WCAG 2.1 auditor, APCA contrast checker, keyboard navigation simulator, color blindness simulator, screen reader tester, web accessibility audit, automated a11y remediation, ADA compliance tool, section 508 accessibility"
+    />
+    <meta name="author" content="AccessiVision" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <link rel="canonical" href="https://bhoomi-1404.github.io/accessivision/" />
+    <meta name="theme-color" content="#0E1017" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Favicons & App Icons (Direct Data URI + Multi-Format Cache-Busted Fallbacks) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20width%3D%2232%22%20height%3D%2232%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%23090A0F%22%2F%3E%3Crect%20x%3D%220.5%22%20y%3D%220.5%22%20width%3D%2231%22%20height%3D%2231%22%20rx%3D%227.5%22%20fill%3D%22none%22%20stroke%3D%22%2327272A%22%20stroke-width%3D%221%22%2F%3E%3Cg%20transform%3D%22translate(4%2C%204)%22%20fill%3D%22none%22%20stroke%3D%22%23F4F4F5%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%207V5a2%202%200%200%201%202-2h2%22%2F%3E%3Cpath%20d%3D%22M17%203h2a2%202%200%200%201%202%202v2%22%2F%3E%3Cpath%20d%3D%22M21%2017v2a2%202%200%200%201-2%202h-2%22%2F%3E%3Cpath%20d%3D%22M7%2021H5a2%202%200%200%201-2-2v-2%22%2F%3E%3Cpath%20d%3D%22M18.944%2012.33a1%201%200%200%200%200-.66%207.5%207.5%200%200%200-13.888%200%201%201%200%200%200%200%20.66%207.5%207.5%200%200%200%2013.888%200%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%221%22%20fill%3D%22%23F4F4F5%22%20stroke%3D%22%23F4F4F5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=5" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=5" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=5" />
+    <link rel="shortcut icon" href="/favicon.ico?v=5" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=5" />
+    <link rel="manifest" href="/site.webmanifest?v=5" />
+
+    <!-- Open Graph / Facebook / LinkedIn / Discord Preview -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AccessiVision" />
+    <meta property="og:url" content="https://bhoomi-1404.github.io/accessivision/" />
+    <meta property="og:title" content="AccessiVision — Web Accessibility (a11y) &amp; UX Diagnostic Studio" />
+    <meta
+      property="og:description"
+      content="Visual-first in-browser accessibility workspace. Map keyboard focus traversal paths, simulate 7 vision deficiencies, audit APCA contrast, and hot-patch live DOM bugs instantly."
+    />
+    <meta property="og:image" content="./og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="AccessiVision Web Accessibility Studio Interface" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X Card Preview -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://bhoomi-1404.github.io/accessivision/" />
+    <meta name="twitter:title" content="AccessiVision — In-Browser Web Accessibility Studio" />
+    <meta
+      name="twitter:description"
+      content="Real-time keyboard flow mapping, APCA perceptual contrast audit, 7 vision deficiency simulations, and instant code remediation for WCAG 2.1 compliance."
+    />
+    <meta name="twitter:image" content="./og-image.svg" />
+
+    <!-- Structured Data Schema (JSON-LD for Google Rich Results) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "AccessiVision",
+        "url": "https://bhoomi-1404.github.io/accessivision/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "All (Web Browser)",
+        "description": "Visual-first in-browser accessibility workspace. Map keyboard focus traversal paths, simulate 7 vision deficiencies, audit APCA contrast, and auto-generate WCAG 2.1 fixes in real time.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Real-time WCAG 2.1 automated accessibility audit",
+          "Visual keyboard tab order traversal mapping with jump anomaly detection",
+          "Perceptual APCA and WCAG 2.1 AA/AAA color contrast audit with live hot-patching",
+          "7 vision deficiency simulations (Protanopia, Deuteranopia, Tritanopia, Achromatopsia, Cataracts, Glaucoma tunnel vision, Low Contrast)",
+          "Interactive 50/50 split-screen vision comparison curtain",
+          "Synthetic screen-reader speech engine and live announcement log",
+          "Unified Git diff patch generation and export"
+        ]
+      }
+    </script>
+
+    <!-- Preconnect & Typography Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
   </head>
-  <body class="bg-[#080C12] text-slate-100 antialiased selection:bg-teal-500/30 selection:text-teal-200">
+  <body class="bg-[#090A0F] text-zinc-100 antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

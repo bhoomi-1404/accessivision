@@ -300,7 +300,7 @@ export const App: React.FC = () => {
     if (!doc) return;
     const el = doc.body.querySelector(selector) as HTMLElement | null;
     if (el) {
-      flashElementInIframe(selector, '#0D9488');
+      flashElementInIframe(selector, '#6366F1');
       const ann = createScreenReaderAnnouncement(el, doc, 'focus');
       pushAnnouncement(ann);
     }
@@ -308,7 +308,7 @@ export const App: React.FC = () => {
 
   if (currentView === 'landing') {
     return (
-      <div className="w-full min-h-screen bg-[#080C12] text-slate-100">
+      <div className="w-full min-h-screen bg-[#FAFAFA] text-zinc-900">
         <SvgVisionFilters />
         <LandingPage onLaunchStudio={handleLaunchStudio} />
       </div>
@@ -316,7 +316,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#080C12] text-slate-100 overflow-hidden">
+    <div className="h-screen w-screen flex flex-col bg-[#090A0F] text-zinc-100 overflow-hidden font-sans">
       <SvgVisionFilters />
 
       <TopStudioBar
@@ -337,15 +337,15 @@ export const App: React.FC = () => {
         <div
           onMouseDown={handleMouseDownResize}
           title="Drag left or right to resize Inspector Panel and Viewport"
-          className={`w-2 hover:w-2.5 bg-[#0A0E17] hover:bg-teal-500 cursor-col-resize transition-colors relative z-30 group shrink-0 select-none flex items-center justify-center border-l border-r border-slate-800 hover:border-teal-400 ${
-            isDraggingSidebar ? 'bg-teal-500 border-teal-400' : ''
+          className={`w-1.5 hover:w-2 bg-[#0C0E14] hover:bg-zinc-600 cursor-col-resize transition-all relative z-30 group shrink-0 select-none flex items-center justify-center border-l border-r border-zinc-800 hover:border-zinc-500 ${
+            isDraggingSidebar ? 'bg-zinc-600 border-zinc-500 w-2' : ''
           }`}
         >
           <div
-            className={`w-0.5 h-8 rounded-full transition-colors ${
+            className={`w-0.5 h-6 rounded-full transition-colors ${
               isDraggingSidebar
                 ? 'bg-white'
-                : 'bg-slate-600 group-hover:bg-white'
+                : 'bg-zinc-700 group-hover:bg-white'
             }`}
           />
         </div>

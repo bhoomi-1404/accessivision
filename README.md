@@ -102,8 +102,24 @@ AccessiVision includes a standalone `server.js` with zero dependencies.
    - **Start Command:** `npm start`
 3. Your server will run with built-in CORS proxy and static app serving!
 
-### Option C: Static Hosting (GitHub Pages)
-If hosting statically on GitHub Pages:
+### Option C: Static Hosting (GitHub Pages) with Supabase Edge Function (Recommended for GitHub Pages)
+If hosting statically on GitHub Pages and you want full URL loading without CORS:
+1. Create a free project at [supabase.com](https://supabase.com).
+2. Install Supabase CLI:
+   ```bash
+   brew install supabase/tap/supabase
+   # or: npm install -g supabase
+   ```
+3. Link and deploy the included Edge Function:
+   ```bash
+   supabase login
+   supabase link --project-ref YOUR_PROJECT_REF
+   supabase functions deploy cors-proxy --no-verify-jwt
+   ```
+4. In AccessiVision Studio, open the **`[🌐 Load URL]`** modal &rarr; click **Configure Proxy URL** &rarr; paste `https://YOUR_PROJECT_REF.supabase.co/functions/v1/cors-proxy` &rarr; click **Save**!
+
+### Option D: Pure Static Hosting without Backend
+If hosting purely statically without configuring a server:
 - Run `npm run build`
 - Deploy the `dist/` directory or push your repository.
 - Use the **`[📋 Paste HTML]`** button or the 1-click **Console Snippet** to audit any live website or localhost component directly without needing a backend server!
