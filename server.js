@@ -97,6 +97,11 @@ async function getHeadlessBrowser() {
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
           '--disable-blink-features=AutomationControlled',
           '--disable-infobars',
           '--window-position=0,0',
@@ -149,14 +154,34 @@ const server = http.createServer(async (req, res) => {
 
   const reqUrl = new URL(req.url || '/', `http://localhost:${PORT}`);
 
-  // 1. Health check endpoint
+  // 1. Health check & Diagnostics endpoint
   if (reqUrl.pathname === '/api/health') {
+    let chromeStatus = 'not_configured';
+    let chromeError = null;
+
+    if (CHROME_PATH) {
+      try {
+        const browser = await getHeadlessBrowser();
+        if (browser && browser.connected) {
+          chromeStatus = 'ready';
+        } else {
+          chromeStatus = 'launch_failed';
+        }
+      } catch (err) {
+        chromeStatus = 'launch_error';
+        chromeError = err.message;
+      }
+    }
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(
       JSON.stringify({
         status: 'ok',
         uptime: process.uptime(),
         chromeAvailable: Boolean(CHROME_PATH),
+        chromePath: CHROME_PATH,
+        chromeStatus,
+        chromeError,
       })
     );
     return;
