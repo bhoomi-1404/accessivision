@@ -1,6 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import puppeteer, { Browser } from 'puppeteer-core';
+// @ts-ignore
+import { addExtra } from 'puppeteer-extra';
+import puppeteerCore, { Browser } from 'puppeteer-core';
+// @ts-ignore
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 // @ts-ignore
 import fs from 'fs';
 // @ts-ignore
@@ -8,13 +12,23 @@ import os from 'os';
 // @ts-ignore
 import path from 'path';
 
-declare const process: { env: Record<string, string | undefined> };
+const puppeteerStealth = addExtra(puppeteerCore);
+puppeteerStealth.use(StealthPlugin());
+
+declare const process: { env: Record<string, string | undefined>; cwd: () => string };
 if (typeof process !== 'undefined' && process.env) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
 
+const LOCAL_HEADLESS = path.join(
+  process.cwd(),
+  'chrome-headless-shell/mac_arm-158.0.8121.0/chrome-headless-shell-mac-arm64/chrome-headless-shell'
+);
+
 const CHROME_EXECUTABLE =
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  fs.existsSync(LOCAL_HEADLESS)
+    ? LOCAL_HEADLESS
+    : '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 let sharedBrowser: Browser | null = null;
 let currentProfileDir: string | null = null;
@@ -36,7 +50,7 @@ async function getHeadlessBrowser(): Promise<Browser> {
       );
       currentProfileDir = tmpDir;
 
-      const browser = await puppeteer.launch({
+      const browser = await puppeteerStealth.launch({
         executablePath: CHROME_EXECUTABLE,
         headless: true,
         userDataDir: tmpDir,
@@ -44,11 +58,14 @@ async function getHeadlessBrowser(): Promise<Browser> {
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
-          '--disable-crash-reporter',
-          '--disable-breakpad',
+          '--disable-blink-features=AutomationControlled',
+          '--disable-infobars',
+          '--window-position=0,0',
           '--ignore-certificate-errors',
+          '--ignore-certificate-errors-spki-list',
           '--disable-web-security',
           '--disable-features=IsolateOrigins,site-per-process',
+          '--window-size=1280,840',
         ],
       });
 
@@ -96,7 +113,7 @@ export default defineConfig({
                 path.join(os.tmpdir(), 'accessivision-auth-')
               );
 
-              const headfulBrowser = await puppeteer.launch({
+              const headfulBrowser = await puppeteerStealth.launch({
                 executablePath: CHROME_EXECUTABLE,
                 headless: false,
                 userDataDir: authTmpDir,
@@ -225,19 +242,72 @@ export default defineConfig({
             try {
               await page.setViewport({ width: 1280, height: 840 });
               await page.setUserAgent(
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
               );
+              await page.setExtraHTTPHeaders({
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Sec-Ch-Ua': '"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"',
+                'Sec-Ch-Ua-Mobile': '?0',
+                'Sec-Ch-Ua-Platform': '"macOS"',
+                'Upgrade-Insecure-Requests': '1',
+              });
 
               try {
                 await page.goto(parsedTarget.toString(), {
-                  waitUntil: 'networkidle2',
-                  timeout: 12000,
+                  waitUntil: 'domcontentloaded',
+                  timeout: 16000,
                 });
               } catch {
                 // Keep rendered DOM even if background polling keeps network busy
               }
 
-              await new Promise((r) => setTimeout(r, 1000));
+              // 1. If Cloudflare Turnstile challenge is active, allow up to 3.5s for stealth solve
+              try {
+                const hasChallenge = await page.evaluate(() => {
+                  return Boolean(document.querySelector('#challenge-running, .cf-turnstile, #cf-stage'));
+                });
+                if (hasChallenge) {
+                  await new Promise((r) => setTimeout(r, 3500));
+                }
+              } catch {}
+
+              // 2. Wait for splash / page loaders to complete and real sections/headings to render
+              try {
+                await page.waitForFunction(
+                  () => {
+                    const loader = document.querySelector(
+                      '.page-loader, [data-testid="loader"], .LoadingBlock, .spinner-overlay, #splash, [role="progressbar"]'
+                    );
+                    const sections = document.querySelectorAll(
+                      'section, nav, header, main, article, footer, [id="principles"], h1, h2, h3'
+                    ).length;
+                    return (!loader && sections >= 1) || sections >= 3;
+                  },
+                  { timeout: 10000 }
+                );
+              } catch {
+                // If timeout, proceed with current DOM
+              }
+
+              // Give 800ms for animations and layout positioning
+              await new Promise((r) => setTimeout(r, 800));
+
+              // 3. Scroll to hash target if present
+              if (parsedTarget.hash) {
+                try {
+                  const targetHash = parsedTarget.hash.replace('#', '');
+                  await page.evaluate((hashId: string) => {
+                    const targetEl =
+                      document.getElementById(hashId) ||
+                      document.querySelector(`[name="${hashId}"]`) ||
+                      document.querySelector(`.${hashId}-section`) ||
+                      document.querySelector(`[data-section="${hashId}"]`);
+                    if (targetEl) {
+                      targetEl.scrollIntoView({ behavior: 'instant', block: 'start' });
+                    }
+                  }, targetHash);
+                } catch {}
+              }
 
               const renderedHtml = await page.evaluate((originUrl: string) => {
                 let cssText = '';
@@ -266,7 +336,7 @@ export default defineConfig({
                 // Remove devtool overlays & scripts so they don't pollute or wipe the snapshot
                 clone
                   .querySelectorAll(
-                    'script, .ReactQueryDevtools, [aria-label="React Query Devtools"], meta[http-equiv="Content-Security-Policy"]'
+                    'script, .ReactQueryDevtools, [aria-label="React Query Devtools"], meta[http-equiv="Content-Security-Policy"], .page-loader, .spinner-overlay, [data-testid="loader"]'
                   )
                   .forEach((el) => el.remove());
 

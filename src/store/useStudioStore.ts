@@ -54,6 +54,9 @@ function sanitizeAndRewriteHtmlForSandbox(
   // 1. Strip <script> tags and ReactQueryDevtools so client-side routers don't wipe the DOM
   html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
 
+  // 1b. Strip full-page splash loader overlays if present
+  html = html.replace(/<div\b[^>]*class=["'][^"']*\b(page-loader|spinner-overlay)\b[^"']*["'][^>]*>[\s\S]*?<\/div>\s*<\/div>/gi, '');
+
   // 2. Strip CSP meta tags
   html = html.replace(
     /<meta[^>]*http-equiv=["']?Content-Security-Policy["']?[^>]*>/gi,
@@ -129,7 +132,7 @@ interface StudioState {
   urlError: string | null;
   isEmptySpaShell: boolean;
   sourceModalOpen: boolean;
-  sourceModalTab: 'url' | 'html';
+  sourceModalTab: 'presets' | 'url' | 'html';
   supabaseProxyUrl: string;
 
   // Studio UI Navigation & Overlays
@@ -168,7 +171,7 @@ interface StudioState {
   setCustomHtml: (html: string) => void;
   loadExternalUrl: (url: string) => Promise<void>;
   setSupabaseProxyUrl: (url: string) => void;
-  openSourceModal: (tab?: 'url' | 'html') => void;
+  openSourceModal: (tab?: 'presets' | 'url' | 'html') => void;
   closeSourceModal: () => void;
   setActiveTab: (tab: StudioInspectorTab) => void;
   setCategoryFilter: (cat: IssueCategory | 'all') => void;

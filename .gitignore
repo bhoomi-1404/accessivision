@@ -32,3 +32,6 @@ dist-ssr
 
 # Supabase temp
 supabase/.temp/
+
+# Chrome headless binary downloads
+chrome-headless-shell/

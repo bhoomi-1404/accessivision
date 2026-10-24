@@ -4,6 +4,12 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
+import { addExtra } from 'puppeteer-extra';
+import puppeteerCore from 'puppeteer-core';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+
+const puppeteerStealth = addExtra(puppeteerCore);
+puppeteerStealth.use(StealthPlugin());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,6 +39,12 @@ const MIME_TYPES = {
 
 // Locate Chrome / Chromium executable if available
 function findChromeExecutable() {
+  const localHeadless = path.join(
+    __dirname,
+    'chrome-headless-shell/mac_arm-158.0.8121.0/chrome-headless-shell-mac-arm64/chrome-headless-shell'
+  );
+  if (fs.existsSync(localHeadless)) return localHeadless;
+
   if (process.env.CHROME_PATH && fs.existsSync(process.env.CHROME_PATH)) {
     return process.env.CHROME_PATH;
   }
@@ -62,22 +74,8 @@ let sharedBrowser = null;
 let currentProfileDir = null;
 let browserLaunchPromise = null;
 
-// Dynamically load puppeteer-core if available
-async function loadPuppeteer() {
-  if (puppeteerModule) return puppeteerModule;
-  if (!CHROME_PATH) return null;
-  try {
-    const mod = await import('puppeteer-core');
-    puppeteerModule = mod.default || mod;
-    return puppeteerModule;
-  } catch {
-    return null;
-  }
-}
-
 async function getHeadlessBrowser() {
-  const p = await loadPuppeteer();
-  if (!p || !CHROME_PATH) return null;
+  if (!CHROME_PATH) return null;
 
   if (sharedBrowser && sharedBrowser.connected) {
     return sharedBrowser;
@@ -91,7 +89,7 @@ async function getHeadlessBrowser() {
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'accessivision-chrome-'));
       currentProfileDir = tmpDir;
 
-      const browser = await p.launch({
+      const browser = await puppeteerStealth.launch({
         executablePath: CHROME_PATH,
         headless: true,
         userDataDir: tmpDir,
@@ -99,11 +97,14 @@ async function getHeadlessBrowser() {
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
-          '--disable-crash-reporter',
-          '--disable-breakpad',
+          '--disable-blink-features=AutomationControlled',
+          '--disable-infobars',
+          '--window-position=0,0',
           '--ignore-certificate-errors',
+          '--ignore-certificate-errors-spki-list',
           '--disable-web-security',
           '--disable-features=IsolateOrigins,site-per-process',
+          '--window-size=1280,840',
         ],
       });
 
@@ -287,19 +288,72 @@ const server = http.createServer(async (req, res) => {
         try {
           await page.setViewport({ width: 1280, height: 840 });
           await page.setUserAgent(
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
           );
+          await page.setExtraHTTPHeaders({
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Sec-Ch-Ua': '"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"macOS"',
+            'Upgrade-Insecure-Requests': '1',
+          });
 
           try {
             await page.goto(parsedTarget.toString(), {
-              waitUntil: 'networkidle2',
-              timeout: 12000,
+              waitUntil: 'domcontentloaded',
+              timeout: 16000,
             });
           } catch {
             // Keep rendered DOM even if background polling keeps network active
           }
 
+          // 1. If Cloudflare Turnstile challenge is active, allow up to 3.5s for stealth solve
+          try {
+            const hasChallenge = await page.evaluate(() => {
+              return Boolean(document.querySelector('#challenge-running, .cf-turnstile, #cf-stage'));
+            });
+            if (hasChallenge) {
+              await new Promise((r) => setTimeout(r, 3500));
+            }
+          } catch {}
+
+          // 2. Wait for splash / page loaders to complete and real sections/headings to render
+          try {
+            await page.waitForFunction(
+              () => {
+                const loader = document.querySelector(
+                  '.page-loader, [data-testid="loader"], .LoadingBlock, .spinner-overlay, #splash, [role="progressbar"]'
+                );
+                const sections = document.querySelectorAll(
+                  'section, nav, header, main, article, footer, [id="principles"], h1, h2, h3'
+                ).length;
+                return (!loader && sections >= 1) || sections >= 3;
+              },
+              { timeout: 10000 }
+            );
+          } catch {
+            // If timeout, proceed with current DOM
+          }
+
+          // Give 800ms for animations and layout positioning
           await new Promise((r) => setTimeout(r, 800));
+
+          // 3. Scroll to hash target if present
+          if (parsedTarget.hash) {
+            try {
+              const targetHash = parsedTarget.hash.replace('#', '');
+              await page.evaluate((hashId) => {
+                const targetEl =
+                  document.getElementById(hashId) ||
+                  document.querySelector(`[name="${hashId}"]`) ||
+                  document.querySelector(`.${hashId}-section`) ||
+                  document.querySelector(`[data-section="${hashId}"]`);
+                if (targetEl) {
+                  targetEl.scrollIntoView({ behavior: 'instant', block: 'start' });
+                }
+              }, targetHash);
+            } catch {}
+          }
 
           const renderedHtml = await page.evaluate((originUrl) => {
             let cssText = '';
@@ -324,7 +378,7 @@ const server = http.createServer(async (req, res) => {
             const clone = document.documentElement.cloneNode(true);
             clone
               .querySelectorAll(
-                'script, .ReactQueryDevtools, [aria-label="React Query Devtools"], meta[http-equiv="Content-Security-Policy"]'
+                'script, .ReactQueryDevtools, [aria-label="React Query Devtools"], meta[http-equiv="Content-Security-Policy"], .page-loader, .spinner-overlay, [data-testid="loader"]'
               )
               .forEach((el) => el.remove());
 

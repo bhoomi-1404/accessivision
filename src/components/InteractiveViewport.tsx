@@ -111,11 +111,18 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
     []
   );
 
-  // Listen for live DOM pushes from other tabs via /api/push-dom
+  // Listen for live DOM pushes from other tabs via /api/push-dom (gracefully stops on static hosts)
   useEffect(() => {
+    let isStopped = false;
     const interval = window.setInterval(async () => {
+      if (isStopped) return;
       try {
         const res = await fetch('/api/push-dom');
+        if (res.status === 404) {
+          isStopped = true;
+          window.clearInterval(interval);
+          return;
+        }
         if (!res.ok) return;
         const data = await res.json();
         if (data && data.id && data.id > lastPushIdRef.current && data.html) {
@@ -123,7 +130,8 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
           setCustomHtml(data.html);
         }
       } catch {
-        // ignore polling errors
+        isStopped = true;
+        window.clearInterval(interval);
       }
     }, 1500);
     return () => window.clearInterval(interval);
@@ -493,7 +501,7 @@ export const InteractiveViewport: React.FC<InteractiveViewportProps> = ({
             <span className="text-zinc-300 text-[11px]">
               <strong>Single-Page App Shell Detected:</strong> In your{' '}
               <code className="font-mono text-amber-300">{liveUrlInput}</code> DevTools, right-click the top{' '}
-              <code className="font-mono text-zinc-100">&lt;html&gt;</code> tag $\rightarrow$ Copy outerHTML $\rightarrow$ press{' '}
+              <code className="font-mono text-zinc-100">&lt;html&gt;</code> tag → Copy outerHTML → press{' '}
               <strong className="text-white">Cmd + V</strong> here.
             </span>
           </div>
