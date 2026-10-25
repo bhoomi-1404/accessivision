@@ -11,16 +11,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     CHROME_PATH=/usr/bin/chromium \
-    PORT=3000 \
-    NODE_ENV=production
+    PORT=3000
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+# Install all dependencies (including devDependencies like typescript & vite for build)
+RUN npm install --include=dev
 
 COPY . .
 RUN npm run build
+
+ENV NODE_ENV=production
 
 EXPOSE 3000
 
