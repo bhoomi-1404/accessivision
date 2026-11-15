@@ -124,3 +124,4 @@ If hosting purely statically without configuring a server:
 - Deploy the `dist/` directory or push your repository.
 - Use the **`[📋 Paste HTML]`** button or the 1-click **Console Snippet** to audit any live website or localhost component directly without needing a backend server!
 
+//dummycommit
